@@ -1,6 +1,6 @@
 CREATE TABLE app_hidden.repos(
   uuid                       uuid default uuid_generate_v4() primary key,
-  owner_vcs_uuid         uuid references owner_vcs on delete cascade not null,
+  owner_vcs_uuid             uuid references owner_vcs on delete cascade not null,
   service                    git_service not null default 'github'::git_service,
   service_id                 citext unique CHECK (LENGTH(service_id) < 45) not null,
   name                       username not null,
