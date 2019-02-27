@@ -4,15 +4,13 @@ CREATE TABLE app_hidden.repos(
   service                    git_service not null default 'github'::git_service,
   service_id                 citext unique CHECK (LENGTH(service_id) < 45) not null,
   name                       username not null,
-  using_github_installation  boolean not null default false,
-  webhook_id                 citext CHECK (LENGTH(webhook_id) < 30)
+  using_github_installation  boolean not null default false
 );
 COMMENT on column app_hidden.repos.owner_vcs_uuid is 'The GitHub user/org that owns this repository.';
 COMMENT on column app_hidden.repos.service is 'The repositorys service provider.';
 COMMENT on column app_hidden.repos.service_id is 'The unique GitHub id of the repository.';
 COMMENT on column app_hidden.repos.name is 'The repository slug name.';
 COMMENT on column app_hidden.repos.using_github_installation is 'True: if the repository is using the GitHub App Integration';
-COMMENT on column app_hidden.repos.webhook_id is 'External service webhook id, if setup.';
 
 CREATE UNIQUE INDEX repos_slug on app_hidden.repos (owner_vcs_uuid, name);
 COMMENT on index repos_slug is 'A repository name is unique per GitHub Organization.';
