@@ -4,7 +4,7 @@
 
 CREATE FUNCTION search_services(search_terms text) RETURNS SETOF services AS $$
   SELECT
-    *
+    services.*
   FROM
     services
   INNER JOIN service_categories sc on services.category = sc.uuid
