@@ -77,6 +77,8 @@ BEGIN
     tsv = tsv || to_tsvector('simple', NEW.description);
   end if;
 
+  NEW.tsvector = tsv;
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SET search_path FROM CURRENT;
