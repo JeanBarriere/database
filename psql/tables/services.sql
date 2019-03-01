@@ -59,18 +59,40 @@ CREATE INDEX services_tsvector_idx ON services USING GIN (tsvector);
 CREATE INDEX services_owners_uuid_fk on services (owner_uuid);
 
 CREATE FUNCTION services__update_tsvector() RETURNS trigger AS $$
+DECLARE
+  tsv tsvector;
 BEGIN
-  if NEW.topics IS NULL THEN
-    NEW.tsvector = NULL;
-  ELSE
-    NEW.tsvector = to_tsvector('simple', array_to_string(NEW.topics, E'\n'));
-  END IF;
+  --- Create an empty ts vector.
+  tsv = to_tsvector('simple', '');
+
+  if NEW.topics IS NOT NULL THEN
+    tsv = tsv || to_tsvector('simple', array_to_string(NEW.topics, E'\n'));
+  end if;
+
+  if NEW.name IS NOT NULL THEN
+    tsv = tsv || to_tsvector('simple', NEW.name);
+  end if;
+
+  if NEW.description IS NOT NULL THEN
+    tsv = tsv || to_tsvector('simple', NEW.description);
+  end if;
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SET search_path FROM CURRENT;
 
-CREATE TRIGGER _200_update_tsvector_insert BEFORE INSERT ON services FOR EACH ROW EXECUTE PROCEDURE services__update_tsvector();
-CREATE TRIGGER _200_update_tsvector_update BEFORE UPDATE ON services FOR EACH ROW WHEN (NEW.topics IS DISTINCT FROM OLD.topics) EXECUTE PROCEDURE services__update_tsvector();
+CREATE TRIGGER _200_update_tsvector_insert
+  BEFORE INSERT ON services
+  FOR EACH ROW
+  EXECUTE PROCEDURE services__update_tsvector();
+
+CREATE TRIGGER _200_update_tsvector_update
+  BEFORE UPDATE ON services
+  FOR EACH ROW
+  WHEN (NEW.topics IS DISTINCT FROM OLD.topics
+          OR NEW.name IS DISTINCT FROM OLD.name
+          OR NEW.description IS DISTINCT FROM OLD.description)
+  EXECUTE PROCEDURE services__update_tsvector();
 
 CREATE TYPE service_state as enum('DEVELOPMENT', 'PRERELEASE', 'BETA', 'STABLE', 'ARCHIVED');
 
