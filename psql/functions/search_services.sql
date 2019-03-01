@@ -7,7 +7,7 @@ CREATE FUNCTION search_services(search_terms text) RETURNS SETOF services AS $$
     services.*
   FROM
     services
-  INNER JOIN service_categories sc on services.category = sc.uuid
+  LEFT JOIN service_categories sc on services.category = sc.uuid
   INNER JOIN owners on services.owner_uuid = owners.uuid
   WHERE
     services.tsvector @@ app_hidden.search_terms_to_tsquery('simple', search_terms)
