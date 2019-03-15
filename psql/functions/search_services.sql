@@ -14,6 +14,7 @@ CREATE FUNCTION search_services(search_terms text) RETURNS SETOF services AS $$
     OR sc.title ILIKE concat('%', search_terms, '%')
     OR services.name ILIKE concat('%', search_terms, '%')
     OR owners.name ILIKE concat('%', search_terms, '%')
+    OR owners.username ILIKE concat('%', search_terms, '%')
     OR description ILIKE concat('%', search_terms, '%')
   ORDER BY
     ts_rank(services.tsvector, app_hidden.search_terms_to_tsquery('simple', search_terms)) DESC,
