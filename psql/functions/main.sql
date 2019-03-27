@@ -10,5 +10,3 @@
 \ir convert_to_hostname.sql
 \ir random.sql
 \ir create_owner_by_login.sql
-\ir create_organization.sql
-\ir create_repository.sql

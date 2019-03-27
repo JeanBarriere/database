@@ -43,6 +43,12 @@ insert into owners(uuid, is_user, username) values ('EB0C25D8-5B5A-43F6-81B4-1A3
 insert into owners(uuid, is_user, username) values ('B54DC244-DCA4-411A-A439-BC496F9B4256', true, 'U_2');
 insert into owner_vcs (uuid, owner_uuid, service_id, username) values ('EB0C25D8-5B5A-43F6-81B4-1A3880243C96', 'EB0C25D8-5B5A-43F6-81B4-1A3880243C96', '13598043290', 'user_1');
 insert into owner_vcs (uuid, owner_uuid, service_id, username) values ('B54DC244-DCA4-411A-A439-BC496F9B4256', 'B54DC244-DCA4-411A-A439-BC496F9B4256', '23598043291', 'user_2');
+
+-- Set this setting, because there's a trigger on owners
+-- which uses the function current_owner_uuid,
+-- which relies on this setting being set.
+select set_config('jwt.claims.owner_uuid', 'EB0C25D8-5B5A-43F6-81B4-1A3880243C96', false);
+
 insert into owners(uuid, is_user, username) values ('20B199EA-5F50-41D8-8D03-C126A3E8F19C', false, 'O_1');
 insert into owners(uuid, is_user, username) values ('D74A3C75-FFF9-43E0-BBAB-EB3F76168E6D', false, 'O_2');
 insert into repos(uuid, owner_vcs_uuid, service, service_id, name) values ('2E2586E2-D2D7-4E6F-B10E-62C89CC47D51', 'EB0C25D8-5B5A-43F6-81B4-1A3880243C96', 'github', '999', 'A-a');
