@@ -29,6 +29,24 @@ CREATE UNIQUE INDEX owner_vcs_ids on owner_vcs (service, service_id);
 COMMENT on index owner_vcs_username is 'Can only have one service:username pair.';
 COMMENT on index owner_vcs_ids is 'Can only have one service:service_id pair.';
 
+CREATE FUNCTION owner_vcs_check_conflicting_username() returns trigger as $$
+begin
+  if exists (
+      select 1 from owner_vcs
+      where service = new.service
+        and username = new.username) then
+    -- There is an old username associated with this username.
+    -- This would typically happen when somebody changes their username on the service,
+    -- and that old username is taken up by somebody new.
+    delete from owner_vcs where service = new.service and username = new.username;
+  end if;
+  return new;
+end;
+$$ language plpgsql security definer SET search_path FROM CURRENT;
+
+CREATE TRIGGER _050_owner_vcs_check_conflicting_username before insert on owner_vcs
+  for each row execute procedure owner_vcs_check_conflicting_username();
+
 CREATE TABLE owner_emails (
   uuid                    uuid default uuid_generate_v4() primary key,
   owner_uuid              uuid not null references owners on delete cascade,
