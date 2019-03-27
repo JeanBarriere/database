@@ -15,7 +15,7 @@ CREATE TABLE owner_vcs (
   owner_uuid              uuid not null references owners on delete cascade,
   service                 git_service not null default 'github'::git_service,
   service_id              citext not null,
-  username                username not null,
+  username                username,
   createstamp             timestamptz not null default now(),
   github_installation_id  int default null
 );
@@ -24,7 +24,7 @@ COMMENT on column owner_vcs.service is 'GitHub or another provider';
 COMMENT on column owner_vcs.service_id is 'The providers unique id';
 COMMENT on column owner_vcs.github_installation_id is 'The installation id to the GitHub App';
 
-CREATE UNIQUE INDEX owner_vcs_username on owner_vcs (service, username);
+CREATE INDEX owner_vcs_username on owner_vcs (service, username);
 CREATE UNIQUE INDEX owner_vcs_ids on owner_vcs (service, service_id);
 COMMENT on index owner_vcs_username is 'Can only have one service:username pair.';
 COMMENT on index owner_vcs_ids is 'Can only have one service:service_id pair.';
@@ -38,7 +38,9 @@ begin
     -- There is an old username associated with this username.
     -- This would typically happen when somebody changes their username on the service,
     -- and that old username is taken up by somebody new.
-    delete from owner_vcs where service = new.service and username = new.username;
+    update owner_vcs
+      set username = null
+      where service = new.service and username = new.username;
   end if;
   return new;
 end;
