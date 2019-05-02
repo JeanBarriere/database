@@ -7,6 +7,6 @@ CREATE FUNCTION convert_to_hostname(name title) RETURNS text AS $$
       ),
       '[^\w\-\_]', '', 'gi'
     )
-    from 1 for 24
+    from 1 for 256
   );
 $$ LANGUAGE sql STABLE SET search_path FROM CURRENT;
