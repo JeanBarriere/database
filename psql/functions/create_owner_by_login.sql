@@ -1,10 +1,25 @@
 CREATE FUNCTION app_private.create_owner_by_login(
+  service app_public.git_service,
+  service_id text,
+  username username,
+  name text,
+  email email,
+  oauth_token text
+) RETURNS json AS $$
+  BEGIN
+    RETURN app_private.create_owner_by_login(
+      $1, $2, $3, $4, $5, $6, TRUE);
+  END;
+$$ LANGUAGE plpgsql VOLATILE SET search_path FROM CURRENT;
+
+CREATE FUNCTION app_private.create_owner_by_login(
     service app_public.git_service,
     service_id text,
     username username,
     name text,
     email email,
-    oauth_token text
+    oauth_token text,
+    is_user boolean
 ) RETURNS json AS $$
   DECLARE _owner_uuid uuid DEFAULT NULL;
   DECLARE _owner_vcs_uuid uuid DEFAULT NULL;
@@ -39,18 +54,22 @@ CREATE FUNCTION app_private.create_owner_by_login(
     ELSE
 
       INSERT INTO owners (is_user, username, name)
-        VALUES (true, $3, $4)
+        VALUES ($7, $3, $4)
         RETURNING uuid into _owner_uuid;
 
       INSERT INTO owner_vcs (owner_uuid, service, service_id, username)
         VALUES (_owner_uuid, $1, $2, $3)
         RETURNING uuid into _owner_vcs_uuid;
 
-      INSERT INTO owner_emails (owner_uuid, email, is_verified)
-        VALUES (_owner_uuid, $5, true);
+      IF $5 IS NOT NULL THEN
+        INSERT INTO owner_emails (owner_uuid, email, is_verified)
+          VALUES (_owner_uuid, $5, true);
+      END IF;
 
-      INSERT INTO app_private.owner_vcs_secrets (owner_vcs_uuid, oauth_token)
-        VALUES (_owner_vcs_uuid, $6);
+      IF $6 IS NOT NULL THEN
+        INSERT INTO app_private.owner_vcs_secrets (owner_vcs_uuid, oauth_token)
+          VALUES (_owner_vcs_uuid, $6);
+      END IF;
 
     END IF;
 
