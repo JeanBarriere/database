@@ -20,7 +20,7 @@ CREATE TABLE owner_vcs (
   github_installation_id  int default null
 );
 COMMENT on column owner_vcs.username is 'The handler name to the provider service';
-COMMENT on column owner_vcs.owner_uuid is 'A user can attach a vcs to their provile, this is for users-only, not organizations.';
+COMMENT on column owner_vcs.owner_uuid is 'A user can attach a vcs to their profile, this is for users-only, not organizations.';
 COMMENT on column owner_vcs.service is 'GitHub or another provider';
 COMMENT on column owner_vcs.service_id is 'The providers unique id';
 COMMENT on column owner_vcs.github_installation_id is 'The installation id to the GitHub App';
