@@ -12,7 +12,7 @@ CREATE UNIQUE INDEX owner_username on owners (username);
 
 CREATE TABLE owner_vcs (
   uuid                    uuid default uuid_generate_v4() primary key,
-  owner_uuid              uuid references owners on delete cascade,
+  owner_uuid              uuid references owners on delete set null,
   service                 git_service not null default 'github'::git_service,
   service_id              citext not null,
   username                username,
