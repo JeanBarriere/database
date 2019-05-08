@@ -12,7 +12,7 @@ CREATE UNIQUE INDEX owner_username on owners (username);
 
 CREATE TABLE owner_vcs (
   uuid                    uuid default uuid_generate_v4() primary key,
-  owner_uuid              uuid not null references owners on delete cascade,
+  owner_uuid              uuid references owners on delete set null,
   service                 git_service not null default 'github'::git_service,
   service_id              citext not null,
   username                username,
@@ -20,6 +20,7 @@ CREATE TABLE owner_vcs (
   github_installation_id  int default null
 );
 COMMENT on column owner_vcs.username is 'The handler name to the provider service';
+COMMENT on column owner_vcs.owner_uuid is 'A user can attach a vcs to their profile, this is for users-only, not organizations.';
 COMMENT on column owner_vcs.service is 'GitHub or another provider';
 COMMENT on column owner_vcs.service_id is 'The providers unique id';
 COMMENT on column owner_vcs.github_installation_id is 'The installation id to the GitHub App';
