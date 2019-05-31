@@ -59,6 +59,15 @@ CREATE TABLE owner_emails (
 
 CREATE UNIQUE INDEX ON owner_emails(owner_uuid, email); -- This index serves two purposes
 
+CREATE TABLE owner_containerconfigs (
+  uuid                    uuid default uuid_generate_v4() primary key,
+  owner_uuid              uuid not null references owners on delete cascade,
+  name                    varchar(45) not null,
+  containerconfig         jsonb not null,
+  UNIQUE (owner_uuid, name)
+);
+COMMENT on column owner_containerconfigs.containerconfig is 'Docker config containing the auth credentials';
+
 CREATE TABLE app_private.owner_vcs_secrets (
   owner_vcs_uuid      uuid primary key references owner_vcs on delete cascade,
   oauth_token             varchar(45)
