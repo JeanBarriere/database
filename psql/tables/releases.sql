@@ -8,6 +8,7 @@ CREATE TABLE releases(
   state                   release_state not null default 'QUEUED'::release_state,
   source                  release_source not null default 'CODE_UPDATE'::release_source,
   payload                 jsonb default '{"__default__": "true"}'::jsonb,
+  always_pull_images      boolean not null default false,
   primary key (app_uuid, id)
 );
 COMMENT on table releases is 'Identifying the active version of the application.';
