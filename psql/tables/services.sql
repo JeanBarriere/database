@@ -111,3 +111,9 @@ ALTER TABLE app_private.owner_subscriptions
   FOREIGN KEY (plan_uuid)
   REFERENCES service_plans(uuid)
   ON DELETE RESTRICT;
+
+CREATE TABLE service_usage(
+  service_uuid               uuid unique references services on delete cascade not null,
+  memory_bytes               float[] default array[]::float[] not null,
+  cpu_units                  float[] default array[]::float[] not null
+)
