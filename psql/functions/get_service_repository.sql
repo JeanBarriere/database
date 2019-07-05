@@ -1,7 +1,7 @@
 CREATE TYPE app_public.service_repository AS (
   service     app_public.git_service,
   owner_name  app_public.username,
-  name        app_public.username
+  repo_name   app_public.username
 );
 
 CREATE FUNCTION app_public.get_service_repository(service_uuid uuid) RETURNS app_public.service_repository AS $$
@@ -11,6 +11,6 @@ CREATE FUNCTION app_public.get_service_repository(service_uuid uuid) RETURNS app
   INNER JOIN app_public.owner_vcs o ON (o.uuid = r.owner_vcs_uuid)
   WHERE s.uuid = service_uuid
   LIMIT 1
-$$ LANGUAGE sql STABLE SECURITY DEFINER SET search_path FROM CURRENT;
+$$ LANGUAGE sql STABLE SET search_path FROM CURRENT;
 
 COMMENT ON FUNCTION app_public.get_service_repository(uuid) IS E'Return the repository information for a single service.';
