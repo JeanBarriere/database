@@ -5,7 +5,7 @@ CREATE TYPE app_public.service_repository AS (
 );
 
 CREATE FUNCTION app_public.get_service_repository(service_uuid uuid) RETURNS app_public.service_repository AS $$
-  SELECT o.service AS service, o.username AS owner_name, r.name AS name
+  SELECT o.service AS service, o.username AS owner_name, r.name AS repo_name
   FROM app_public.services s
   INNER JOIN app_hidden.repos r ON (r.uuid = s.repo_uuid)
   INNER JOIN app_public.owner_vcs o ON (o.uuid = r.owner_vcs_uuid)
