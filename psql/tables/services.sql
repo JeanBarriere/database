@@ -111,3 +111,12 @@ ALTER TABLE app_private.owner_subscriptions
   FOREIGN KEY (plan_uuid)
   REFERENCES service_plans(uuid)
   ON DELETE RESTRICT;
+
+CREATE TABLE service_usage(
+  service_uuid               uuid references services on delete cascade not null,
+  tag                        varchar(128) not null,
+  memory_bytes               float[25] default array_fill(-1.0, array[25]) CHECK (cardinality(memory_bytes) = 25) not null,
+  cpu_units                  float[25] default array_fill(-1.0, array[25]) CHECK (cardinality(cpu_units) = 25) not null,
+  next_index                 int default 1 CHECK (next_index between 1 and 25) not null,
+  primary key (service_uuid, tag)
+);
