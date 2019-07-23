@@ -3,9 +3,10 @@ CREATE TABLE owners(
   is_user                 boolean not null default true,
   username                username not null,
   createstamp             timestamptz not null default now(),
-  name                    citext
+  name                    citext,
+  profile_image_url       citext default null
 );
-COMMENT on column owners.username is 'Unique namespace for nagivation and discovery.';
+COMMENT on column owners.username is 'Unique namespace for navigation and discovery.';
 COMMENT on column owners.name is 'A pretty organization name, UI visual only.';
 
 CREATE UNIQUE INDEX owner_username on owners (username);
