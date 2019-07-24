@@ -39,4 +39,11 @@ CREATE POLICY select_public on service_usage FOR SELECT USING (
         WHERE services.public
     )
 );
+CREATE POLICY select_own on service_usage FOR SELECT USING (
+    EXISTS (
+        SELECT 1 FROM services
+        INNER JOIN service_tags on services.uuid = service_tags.service_uuid
+        WHERE owner_uuid = current_owner_uuid()
+    )
+);
 GRANT SELECT ON service_usage to asyncy_visitor;

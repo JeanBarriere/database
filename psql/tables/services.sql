@@ -83,6 +83,7 @@ CREATE TABLE service_tags(
   configuration              jsonb not null,
   readme                     text,
   updated_at                 timestamp not null default now(),
+  unique (service_uuid, tag)
 );
 
 ---
@@ -135,3 +136,8 @@ CREATE TABLE service_usage(
   cpu_units                  float[25] default array_fill(-1.0, array[25]) CHECK (cardinality(cpu_units) = 25) not null,
   next_index                 int default 1 CHECK (next_index between 1 and 25) not null
 );
+COMMENT on table service_usage is 'Resource usage metrics for services';
+COMMENT on column service_usage.service_tag_uuid is 'The (service_uuid, image_tag) identifier';
+COMMENT on column service_usage.memory_bytes is 'Circular queue storing memory bytes consumed';
+COMMENT on column service_usage.cpu_units is 'Circular queue storing cpu units consumed';
+COMMENT on column service_usage.next_index is 'Next index to be updated in the circular queues';
