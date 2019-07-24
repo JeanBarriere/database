@@ -42,6 +42,7 @@ CREATE TABLE services(
   is_certified               boolean not null default false,
   links                      jsonb,
   tsvector                   tsvector,
+  created_at                 timestamp not null default now(),
   public                     boolean not null default false
 );
 COMMENT on column services.name is 'The namespace used for the project slug (org/service).';
@@ -80,8 +81,24 @@ CREATE TABLE service_tags(
   tag                        citext not null,
   state                      service_state not null,
   configuration              jsonb not null,
-  readme                     text
+  readme                     text,
+  updated_at                 timestamp not null default now(),
 );
+
+---
+
+CREATE FUNCTION update_ts_in_service_tags() returns trigger as $$
+begin
+    NEW.updated_at = now();
+    return NEW;
+end;
+$$ language plpgsql SET search_path FROM CURRENT;
+
+CREATE TRIGGER _100_update_ts_in_service_tags before update on service_tags
+    for each row
+    execute procedure update_ts_in_service_tags();
+
+---
 
 COMMENT on column service_tags.tag is 'The verion identifier. E.g., latest or v1.2';
 COMMENT on column service_tags.configuration is 'The post processing of the microservice.yml file.';
