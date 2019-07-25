@@ -32,18 +32,16 @@ GRANT SELECT ON service_plans TO asyncy_visitor;
 
 ALTER TABLE service_usage ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY select_public on service_usage FOR SELECT USING (
+CREATE POLICY select_public_or_own on service_usage FOR SELECT USING (
     EXISTS (
-        SELECT 1 FROM services
-        INNER JOIN service_tags on services.uuid = service_tags.service_uuid
-        WHERE services.public
+        SELECT 1 FROM service_tags
+        INNER JOIN services on services.uuid = service_tags.service_uuid
+        WHERE service_tags.uuid = service_usage.service_tag_uuid
+          AND (
+              services.public
+              OR services.owner_uuid = current_owner_uuid()
+          )
     )
 );
-CREATE POLICY select_own on service_usage FOR SELECT USING (
-    EXISTS (
-        SELECT 1 FROM services
-        INNER JOIN service_tags on services.uuid = service_tags.service_uuid
-        WHERE owner_uuid = current_owner_uuid()
-    )
-);
+
 GRANT SELECT ON service_usage to asyncy_visitor;
