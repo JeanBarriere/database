@@ -22,17 +22,9 @@ CREATE TRIGGER _500_abort_on_team_owner_change
   WHEN (OLD.owner_uuid IS DISTINCT FROM NEW.owner_uuid)
   EXECUTE PROCEDURE abort_with_errorcode('400', 'Teams are not allowed to move between owners.');
 
-CREATE TABLE team_members(
-  team_uuid                  uuid references teams on delete cascade not null,
-  owner_uuid                 uuid references owners on delete cascade not null,
-  primary key (team_uuid, owner_uuid)
-);
-COMMENT on table team_members is 'Collection of users that belong to a team.';
-COMMENT on column team_members.owner_uuid is 'The member of the team.';
 
 CREATE TABLE team_apps(
   team_uuid                  uuid references teams on delete cascade not null,
   app_uuid                   uuid references apps on delete cascade not null,
   primary key (team_uuid, app_uuid)
 );
-COMMENT on table team_members is 'Collection of apps that belong to a team.';

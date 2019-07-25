@@ -6,9 +6,6 @@ BEGIN
     VALUES (NEW.uuid, 'Owners')
     RETURNING uuid into _team_uuid;
 
-  INSERT INTO team_members (team_uuid, owner_uuid)
-    VALUES (_team_uuid, current_owner_uuid());
-
   INSERT INTO team_permissions (team_uuid, permission_slug, owner_uuid)
     VALUES (_team_uuid, 'ADMIN', current_owner_uuid());
 

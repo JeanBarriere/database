@@ -61,4 +61,3 @@ insert into tokens(uuid, owner_uuid, type, name) VALUES ('901A9BC2-5FD6-4A42-B54
 update token_secrets set secret = 'c2poZGYwOXcwZWZmMGRnaGY=' WHERE token_uuid = '901A9BC2-5FD6-4A42-B54A-BD9242D8DE5C';
 
 insert into teams(uuid, owner_uuid, name) VALUES('1D835807-A538-45AA-A9D3-4EBC10D65738', 'D74A3C75-FFF9-43E0-BBAB-EB3F76168E6D', 'B Team');
-insert into team_members(team_uuid, owner_uuid) VALUES('1D835807-A538-45AA-A9D3-4EBC10D65738', 'EB0C25D8-5B5A-43F6-81B4-1A3880243C96');
