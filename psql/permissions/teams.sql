@@ -20,21 +20,6 @@ GRANT DELETE ON team_permissions TO asyncy_visitor;
 
 ---
 
-ALTER TABLE team_members ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY select_team_member ON team_members FOR SELECT USING (EXISTS(SELECT 1 FROM teams WHERE teams.uuid = team_uuid));
-GRANT SELECT ON team_members TO asyncy_visitor;
-
-CREATE POLICY insert_admin ON team_members FOR INSERT WITH CHECK
-  (current_owner_has_organization_permission((SELECT owner_uuid FROM teams WHERE teams.uuid = team_uuid), 'ADMIN'));
-GRANT INSERT ON team_members TO asyncy_visitor;
-
-CREATE POLICY delete_admin ON team_members FOR DELETE USING
-  (current_owner_has_organization_permission((SELECT owner_uuid FROM teams WHERE teams.uuid = team_uuid), 'ADMIN'));
-GRANT DELETE ON team_members TO asyncy_visitor;
-
----
-
 ALTER TABLE team_apps ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY select_team_member ON team_apps FOR SELECT USING (EXISTS(SELECT 1 FROM teams WHERE teams.uuid = team_uuid));

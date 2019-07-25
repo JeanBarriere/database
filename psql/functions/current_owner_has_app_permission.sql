@@ -10,10 +10,8 @@ CREATE FUNCTION app_hidden.current_owner_has_app_permission(app_uuid uuid, requi
       EXISTS(
         SELECT 1
         FROM team_apps
-        INNER JOIN team_members USING (team_uuid)
         INNER JOIN team_permissions USING (team_uuid)
         WHERE team_apps.app_uuid = current_owner_has_app_permission.app_uuid
-        AND team_members.owner_uuid = current_owner_uuid()
         AND team_permissions.owner_uuid = current_owner_uuid()
         AND team_permissions.permission_slug IN (required_permission_slug, 'ADMIN')
         LIMIT 1
