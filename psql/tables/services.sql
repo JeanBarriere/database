@@ -76,13 +76,14 @@ CREATE TRIGGER _200_update_tsvector_update BEFORE UPDATE ON services FOR EACH RO
 CREATE TYPE service_state as enum('DEVELOPMENT', 'PRERELEASE', 'BETA', 'STABLE', 'ARCHIVED');
 
 CREATE TABLE service_tags(
+  uuid                       uuid default uuid_generate_v4() primary key,
   service_uuid               uuid references services on delete cascade not null,
   tag                        citext not null,
   state                      service_state not null,
   configuration              jsonb not null,
   readme                     text,
   updated_at                 timestamp not null default now(),
-  primary key (service_uuid, tag)
+  unique (service_uuid, tag)
 );
 
 ---
@@ -130,10 +131,13 @@ ALTER TABLE app_private.owner_subscriptions
   ON DELETE RESTRICT;
 
 CREATE TABLE service_usage(
-  service_uuid               uuid references services on delete cascade not null,
-  tag                        varchar(128) not null,
+  service_tag_uuid           uuid references service_tags on delete cascade primary key,
   memory_bytes               float[25] default array_fill(-1.0, array[25]) CHECK (cardinality(memory_bytes) = 25) not null,
   cpu_units                  float[25] default array_fill(-1.0, array[25]) CHECK (cardinality(cpu_units) = 25) not null,
-  next_index                 int default 1 CHECK (next_index between 1 and 25) not null,
-  primary key (service_uuid, tag)
+  next_index                 int default 1 CHECK (next_index between 1 and 25) not null
 );
+COMMENT on table service_usage is 'Resource usage metrics for services';
+COMMENT on column service_usage.service_tag_uuid is 'The (service_uuid, image_tag) identifier';
+COMMENT on column service_usage.memory_bytes is 'Circular queue storing memory bytes consumed';
+COMMENT on column service_usage.cpu_units is 'Circular queue storing cpu units consumed';
+COMMENT on column service_usage.next_index is 'Next index to be updated in the circular queues';
