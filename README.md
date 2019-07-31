@@ -4,12 +4,12 @@ This is the Storyscript Cloud's database bootstrap tool, which creates the schem
 ## Creating the database locally
 1. Ensure you have Postgres installed and running (at least version 10.5)
 2. Install the `make` tool (on macOS, run `xcode-select --install`)
-3. Create the `storyscript` database in Postgres. In the terminal run the following commands:
+3. Create the `asyncy` database in Postgres. In the terminal run the following commands:
   - `psql postgres`
-  - `create database storyscript;`
+  - `create database asyncy;`
   - `\q`
 4. Clone this project
-5. Run `make reset DB=storyscript` in the cloned project
+5. Run `make reset DB=asyncy` in the cloned project
 
 Here's what your output should look like:
 ```shell
@@ -17,10 +17,10 @@ $ psql postgres
 psql (10.5)
 Type "help" for help.
 
-postgres=# create database storyscript;
+postgres=# create database asyncy;
 CREATE DATABASE
 postgres=# \q
-$ make reset DB=storyscript
+$ make reset DB=asyncy
 ...
 ...
 $
