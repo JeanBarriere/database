@@ -6,9 +6,30 @@ CREATE FUNCTION app_private.create_owner_by_login(
   email email,
   oauth_token text
 ) RETURNS json AS $$
+  DECLARE
+    profile_picture text;
+  BEGIN
+    profile_picture := '';
+    IF $1='github' THEN
+      profile_picture := CONCAT('https://avatars.githubusercontent.com/u/', $2);
+    END IF;
+    RETURN app_private.create_owner_by_login(
+      $1, $2, $3, $4, $5, $6, profile_picture, TRUE);
+  END;
+$$ LANGUAGE plpgsql VOLATILE SET search_path FROM CURRENT;
+
+CREATE FUNCTION app_private.create_owner_by_login(
+  service app_public.git_service,
+  service_id text,
+  username username,
+  name text,
+  email email,
+  oauth_token text,
+  profile_image_url text
+) RETURNS json AS $$
   BEGIN
     RETURN app_private.create_owner_by_login(
-      $1, $2, $3, $4, $5, $6, TRUE);
+      $1, $2, $3, $4, $5, $6, $7, TRUE);
   END;
 $$ LANGUAGE plpgsql VOLATILE SET search_path FROM CURRENT;
 
@@ -19,6 +40,7 @@ CREATE FUNCTION app_private.create_owner_by_login(
     name text,
     email email,
     oauth_token text,
+    profile_image_url text,
     is_user boolean
 ) RETURNS json AS $$
   DECLARE _owner_uuid uuid DEFAULT NULL;
@@ -53,8 +75,8 @@ CREATE FUNCTION app_private.create_owner_by_login(
 
     ELSE
 
-      INSERT INTO owners (is_user, username, name)
-        VALUES ($7, $3, $4)
+      INSERT INTO owners (is_user, username, name, profile_image_url)
+        VALUES ($8, $3, $4, $7)
         RETURNING uuid into _owner_uuid;
 
       INSERT INTO owner_vcs (owner_uuid, service, service_id, username)
