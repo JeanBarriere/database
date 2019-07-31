@@ -4,6 +4,26 @@ CREATE FUNCTION app_private.create_owner_by_login(
   username username,
   name text,
   email email,
+  oauth_token text
+) RETURNS json AS $$
+  DECLARE
+    profile_picture text;
+  BEGIN
+    profile_picture := '';
+    IF $1='github' THEN
+      profile_picture := CONCAT('https://avatars.githubusercontent.com/u/', $2);
+    END IF;
+    RETURN app_private.create_owner_by_login(
+      $1, $2, $3, $4, $5, $6, profile_picture, TRUE);
+  END;
+$$ LANGUAGE plpgsql VOLATILE SET search_path FROM CURRENT;
+
+CREATE FUNCTION app_private.create_owner_by_login(
+  service app_public.git_service,
+  service_id text,
+  username username,
+  name text,
+  email email,
   oauth_token text,
   profile_image_url text
 ) RETURNS json AS $$
