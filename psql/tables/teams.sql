@@ -22,6 +22,11 @@ CREATE TRIGGER _500_abort_on_team_owner_change
   WHEN (OLD.owner_uuid IS DISTINCT FROM NEW.owner_uuid)
   EXECUTE PROCEDURE abort_with_errorcode('400', 'Teams are not allowed to move between owners.');
 
+CREATE TRIGGER _500_abort_on_team_owner_is_user
+  BEFORE INSERT ON teams
+  FOR EACH ROW
+  WHEN (NEW.is_user IS TRUE)
+  EXECUTE PROCEDURE abort_with_errorcode('400', 'Teams cannot be owned by users.');
 
 CREATE TABLE team_apps(
   team_uuid                  uuid references teams on delete cascade not null,
