@@ -11,6 +11,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql VOLATILE;
 
+DROP TRIGGER IF EXISTS _500_abort_on_team_owner_is_user ON teams;
 CREATE TRIGGER _500_abort_on_team_owner_is_user
   BEFORE INSERT ON teams
   FOR EACH ROW
