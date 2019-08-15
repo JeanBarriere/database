@@ -7,7 +7,7 @@ BEGIN
 
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql VOLATILE;
+$$ LANGUAGE plpgsql STABLE;
 
 CREATE TRIGGER _100_assert_owner_is_organization
   BEFORE INSERT ON teams
