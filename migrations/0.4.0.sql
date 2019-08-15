@@ -9,7 +9,7 @@ BEGIN
 
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql VOLATILE;
+$$ LANGUAGE plpgsql STABLE;
 
 DROP TRIGGER IF EXISTS _100_assert_owner_is_organization ON teams;
 CREATE TRIGGER _100_assert_owner_is_organization
