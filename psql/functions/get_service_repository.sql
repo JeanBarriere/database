@@ -1,7 +1,7 @@
 CREATE TYPE app_public.service_repository AS (
   service     app_public.git_service,
-  owner_name  app_public.username,
-  repo_name   app_public.username
+  owner_name  citext,
+  repo_name   citext
 );
 
 CREATE FUNCTION app_public.get_service_repository(service_uuid uuid) RETURNS app_public.service_repository AS $$

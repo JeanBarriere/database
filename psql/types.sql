@@ -3,8 +3,8 @@ CREATE TYPE git_service as enum('github');
 CREATE DOMAIN title as citext
   CHECK ( LENGTH(VALUE) < 46 AND VALUE ~ '^[\w\-\.\s]+$' );
 
-CREATE DOMAIN username as text
-  CHECK (LENGTH(VALUE) <= 40 AND VALUE ~ '^[\w\-]+$' );
+CREATE DOMAIN username as citext
+  CHECK (LENGTH(VALUE) <= 45 AND VALUE ~ '^[\w\.\-]+$' );
 
 CREATE DOMAIN hostname as text
   CHECK ( LENGTH(VALUE) > 3 AND LENGTH(VALUE) < 255 AND VALUE ~ '^((\*|[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$' );
