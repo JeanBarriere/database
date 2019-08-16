@@ -16,7 +16,7 @@ CREATE TABLE owner_vcs (
   owner_uuid              uuid references owners on delete set null,
   service                 git_service not null default 'github'::git_service,
   service_id              citext not null,
-  username                username,
+  username                citext not null,
   createstamp             timestamptz not null default now(),
   github_installation_id  int default null
 );

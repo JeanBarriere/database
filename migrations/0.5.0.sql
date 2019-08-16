@@ -4,3 +4,12 @@
 ALTER TABLE app_hidden.repos
     ALTER COLUMN name
     SET DATA TYPE citext;
+
+-- since vcs usernames come directly from vcs
+ALTER TABLE owner_vcs
+    ALTER COLUMN username
+    SET DATA TYPE citext;
+
+ALTER TABLE owner_vcs
+    ALTER COLUMN username
+    SET NOT NULL;
