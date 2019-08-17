@@ -18,7 +18,7 @@ ALTER TABLE owner_vcs
 ALTER DOMAIN username RENAME TO username_pending_delete;
 
 CREATE DOMAIN username as citext
-  CHECK (LENGTH(VALUE) <= 45 AND VALUE ~ '^[\w\.\-]+$' );
+  CHECK (LENGTH(VALUE) <= 45 AND LENGTH(VALUE) >= 2 AND VALUE ~ '^\w([\.\-]?\w)*$' );
 
 ALTER TABLE owners
     ALTER COLUMN username
