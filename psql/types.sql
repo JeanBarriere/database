@@ -36,3 +36,5 @@ CREATE TYPE category_type as enum('SERVICE', 'FUNCTION');
 CREATE TYPE environment as enum('PRODUCTION', 'STAGING', 'DEV');
 
 CREATE TYPE http_method as enum('POST', 'GET', 'PUT', 'DELETE');
+
+CREATE TYPE service_type as enum('container', 'openapi');
