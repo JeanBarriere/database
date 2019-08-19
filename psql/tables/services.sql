@@ -31,9 +31,10 @@ INSERT INTO service_categories (title, icon, type) values
 
 CREATE TABLE services(
   uuid                       uuid default uuid_generate_v4() primary key,
-  repo_uuid                  uuid references repos on delete cascade not null,
+  repo_uuid                  uuid references repos on delete cascade,
   owner_uuid                 uuid references owners on delete cascade not null,
   name                       alias not null,
+  type                       service_type not null default 'container'::service_type,
   category                   uuid references service_categories on delete set null,
   description                text,
   alias                      alias unique,
