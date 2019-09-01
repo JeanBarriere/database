@@ -20,6 +20,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 GRANT asyncy_visitor to asyncy_authenticator;
+GRANT CONNECT ON DATABASE asyncy TO asyncy_authenticator;
 GRANT CONNECT ON DATABASE postgres TO asyncy_authenticator;
 
 GRANT USAGE ON SCHEMA app_public TO asyncy_visitor;
