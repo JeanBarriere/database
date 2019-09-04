@@ -9,3 +9,4 @@
 \ir tokens.sql
 \ir subscriptions.sql
 \ir beta_users.sql
+\ir external_service_metadata.sql
