@@ -1,6 +1,6 @@
 ALTER TABLE owners ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY select_all ON owners FOR SELECT USING (true);
+CREATE POLICY select_own ON owners FOR SELECT USING (uuid = current_owner_uuid());
 GRANT SELECT ON owners TO asyncy_visitor;
 
 ----
