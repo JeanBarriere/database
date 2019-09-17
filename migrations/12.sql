@@ -1,4 +1,9 @@
-CREATE FUNCTION app_private.create_owner_by_login(
+DROP FUNCTION app_private.create_owner_by_login(git_service, text, username, text, email, text);
+DROP FUNCTION app_private.create_owner_by_login(git_service, text, username, text, email, text, text);
+DROP FUNCTION app_private.create_owner_by_login(git_service, text, username, text, email, text, text, boolean);
+DROP FUNCTION app_private.create_owner_by_login(git_service, text, username, text, email, text, boolean);
+
+CREATE OR REPLACE FUNCTION app_private.create_owner_by_login(
   service app_public.git_service,
   service_id text,
   username username,
@@ -12,7 +17,7 @@ CREATE FUNCTION app_private.create_owner_by_login(
   DECLARE _token_uuid uuid DEFAULT NULL;
   BEGIN
     IF profile_image_url IS NULL AND $1 = 'github' THEN
-      profile_image_url = CONCAT('https://avatars.githubusercontent.com/u/', create_owner_by_login.service_id);
+      profile_image_url = CONCAT('https://avatars.githubusercontent.com/u/', $2);
     END IF;
 
     -- TODO IF (service, username) conflict THEN need to truncate the other username
