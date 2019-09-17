@@ -43,7 +43,7 @@ CREATE FUNCTION app_private.create_owner_by_login(
 
     ELSE
 
-      INSERT INTO owners (is_user, username, name, profile_image_url, marketing_source)
+      INSERT INTO owners (is_user, username, name, profile_image_url, marketing_source_uuid)
         VALUES (TRUE, username, name, profile_image_url, marketing_source_uuid)
         RETURNING uuid into _owner_uuid;
 
