@@ -3,6 +3,9 @@ ALTER TABLE owners ENABLE ROW LEVEL SECURITY;
 CREATE POLICY select_own ON owners FOR SELECT USING (uuid = current_owner_uuid());
 GRANT SELECT ON owners TO asyncy_visitor;
 
+CREATE POLICY update_own_marketing_source ON owners FOR UPDATE USING (owner_uuid = current_owner_uuid());
+GRANT UPDATE (marketing_source) ON owners TO asyncy_visitor;
+
 ----
 
 ALTER TABLE owner_vcs ENABLE ROW LEVEL SECURITY;

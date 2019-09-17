@@ -1,4 +1,5 @@
 \ir permissions.sql
+\ir marketing_sources.sql
 \ir owners.sql
 \ir repos.sql
 \ir apps.sql

@@ -4,7 +4,8 @@ CREATE TABLE owners(
   username                username not null,
   createstamp             timestamptz not null default now(),
   name                    citext,
-  profile_image_url       citext default null
+  profile_image_url       citext default null,
+  marketing_source        uuid references marketing_sources on delete set null
 );
 COMMENT on column owners.username is 'Unique namespace for navigation and discovery.';
 COMMENT on column owners.name is 'A pretty organization name, UI visual only.';
