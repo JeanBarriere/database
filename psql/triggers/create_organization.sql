@@ -1,13 +1,16 @@
 CREATE FUNCTION insert_organization_admin() RETURNS TRIGGER AS $$
 DECLARE
-   _team_uuid uuid DEFAULT NULL;
+  _team_uuid uuid DEFAULT NULL;
 BEGIN
   INSERT INTO teams (owner_uuid, name)
-    VALUES (NEW.uuid, 'Owners')
-    RETURNING uuid into _team_uuid;
+  VALUES (NEW.uuid, 'Owners')
+      RETURNING uuid into _team_uuid;
+
+  INSERT INTO team_members (team_uuid, owner_uuid)
+  VALUES (_team_uuid, current_owner_uuid());
 
   INSERT INTO team_permissions (team_uuid, permission_slug, owner_uuid)
-    VALUES (_team_uuid, 'ADMIN', current_owner_uuid());
+  VALUES (_team_uuid, 'ADMIN', current_owner_uuid());
 
   RETURN NEW;
 END;

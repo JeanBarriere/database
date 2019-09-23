@@ -2,7 +2,7 @@ CREATE FUNCTION assert_owner_is_organization() RETURNS TRIGGER AS $$
 BEGIN
 
     IF EXISTS (SELECT 1 FROM app_public.owners WHERE uuid = NEW.owner_uuid AND is_user = TRUE LIMIT 1) THEN
-      RAISE EXCEPTION 'Teams cannot be owned by users.';
+        RAISE EXCEPTION 'Teams cannot be owned by users.';
     END IF;
 
     RETURN NEW;

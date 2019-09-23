@@ -34,7 +34,6 @@ CREATE TABLE services(
   repo_uuid                  uuid references repos on delete cascade,
   owner_uuid                 uuid references owners on delete cascade not null,
   name                       alias not null,
-  type                       service_type not null default 'container'::service_type,
   category                   uuid references service_categories on delete set null,
   description                text,
   alias                      alias unique,
@@ -43,8 +42,9 @@ CREATE TABLE services(
   is_certified               boolean not null default false,
   links                      jsonb,
   tsvector                   tsvector,
+  public                     boolean not null default false,
   created_at                 timestamp not null default now(),
-  public                     boolean not null default false
+  type                       service_type not null default 'container'::service_type
 );
 COMMENT on column services.name is 'The namespace used for the project slug (org/service).';
 COMMENT on column services.alias is 'The namespace reservation for the service';
@@ -77,15 +77,16 @@ CREATE TRIGGER _200_update_tsvector_update BEFORE UPDATE ON services FOR EACH RO
 CREATE TYPE service_state as enum('DEVELOPMENT', 'PRERELEASE', 'BETA', 'STABLE', 'ARCHIVED');
 
 CREATE TABLE service_tags(
-  uuid                       uuid default uuid_generate_v4() primary key,
   service_uuid               uuid references services on delete cascade not null,
   tag                        citext not null,
   state                      service_state not null,
   configuration              jsonb not null,
   readme                     text,
   updated_at                 timestamp not null default now(),
-  unique (service_uuid, tag)
+  uuid                       uuid default uuid_generate_v4() primary key
 );
+
+ALTER TABLE service_tags ADD CONSTRAINT service_tags_unique UNIQUE (service_uuid, tag);
 
 ---
 
@@ -132,13 +133,13 @@ ALTER TABLE app_private.owner_subscriptions
   ON DELETE RESTRICT;
 
 CREATE TABLE service_usage(
-  service_tag_uuid           uuid references service_tags on delete cascade primary key,
   memory_bytes               float[25] default array_fill(-1.0, array[25]) CHECK (cardinality(memory_bytes) = 25) not null,
   cpu_units                  float[25] default array_fill(-1.0, array[25]) CHECK (cardinality(cpu_units) = 25) not null,
-  next_index                 int default 1 CHECK (next_index between 1 and 25) not null
+  next_index                 int default 1 CHECK (next_index between 1 and 25) not null,
+  service_tag_uuid           uuid references service_tags on delete cascade primary key
 );
 COMMENT on table service_usage is 'Resource usage metrics for services';
-COMMENT on column service_usage.service_tag_uuid is 'The (service_uuid, image_tag) identifier';
 COMMENT on column service_usage.memory_bytes is 'Circular queue storing memory bytes consumed';
 COMMENT on column service_usage.cpu_units is 'Circular queue storing cpu units consumed';
 COMMENT on column service_usage.next_index is 'Next index to be updated in the circular queues';
+COMMENT on column service_usage.service_tag_uuid is 'The (service_uuid, image_tag) identifier';

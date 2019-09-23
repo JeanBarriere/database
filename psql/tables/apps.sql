@@ -45,12 +45,12 @@ CREATE TRIGGER _100_app_updated_notify after update on apps
 ---
 
 CREATE FUNCTION app_prevent_restore() returns trigger as $$
-  begin
-    if old.deleted is true then
-      raise 'Once an app is destroyed, no updates are permitted to it.';
-    end if;
-    return new;
-  end;
+begin
+  if old.deleted is true then
+    raise 'Once an app is destroyed, no updates are permitted to it.';
+  end if;
+  return new;
+end;
 $$ language plpgsql security definer SET search_path FROM CURRENT;
 
 CREATE TRIGGER _50_app_prevent_restore before update on apps

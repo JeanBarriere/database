@@ -42,8 +42,8 @@ begin
     -- This would typically happen when somebody changes their username on the service,
     -- and that old username is taken up by somebody new.
     update owner_vcs
-      set username = null
-      where service = new.service and username = new.username;
+    set username = null
+    where service = new.service and username = new.username;
   end if;
   return new;
 end;

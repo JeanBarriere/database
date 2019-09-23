@@ -7,4 +7,4 @@ CREATE TABLE app_public.external_service_metadata(
 
 COMMENT on column external_service_metadata.document_uri is 'The URI of the OpenAPI document';
 COMMENT on column external_service_metadata.properties is 'The properties submitted at service creation, provided to the OMG converter alongside the document';
-COMMENT on column external_service_metadata.last_seen_hash is 'The hash of the document when last converted (in either sucess or failure cases)';
+COMMENT on column external_service_metadata.last_seen_hash is 'The hash of the document when last converted (in either success or failure cases)';

@@ -5,9 +5,9 @@ CREATE TABLE releases(
   message                 text CHECK (LENGTH(message) < 1000) not null,
   owner_uuid              uuid not null default current_owner_uuid() references owners on delete set null,
   timestamp               timestamptz not null default now(),
+  payload                 jsonb default '{"__default__": "true"}'::jsonb,
   state                   release_state not null default 'QUEUED'::release_state,
   source                  release_source not null default 'CODE_UPDATE'::release_source,
-  payload                 jsonb default '{"__default__": "true"}'::jsonb,
   always_pull_images      boolean not null default false,
   primary key (app_uuid, id)
 );
@@ -63,16 +63,16 @@ CREATE TRIGGER _100_releases_next_id_insert before insert on releases
   for each row execute procedure releases_next_id();
 
 CREATE FUNCTION releases_defaults() returns trigger as $$
-  begin
-    -- set payload and config to the previous release when empty
-    if new.payload is null or new.payload->>'__default__' = 'true' then
-      new.payload := (select payload from releases where app_uuid=new.app_uuid and id=new.id-1 limit 1);
-    end if;
-    if new.config is null then
-      new.config := (select config from releases where app_uuid=new.app_uuid and id=new.id-1 limit 1);
-    end if;
-    return new;
-  end;
+begin
+  -- set payload and config to the previous release when empty
+  if new.payload is null or new.payload->>'__default__' = 'true' then
+    new.payload := (select payload from releases where app_uuid=new.app_uuid and id=new.id-1 limit 1);
+  end if;
+  if new.config is null then
+    new.config := (select config from releases where app_uuid=new.app_uuid and id=new.id-1 limit 1);
+  end if;
+  return new;
+end;
 $$ language plpgsql security definer SET search_path FROM CURRENT;
 
 CREATE TRIGGER _101_releases_defaults before insert on releases
@@ -92,36 +92,36 @@ CREATE TRIGGER _900_releases_notify after insert on releases
   for each row execute procedure releases_notify();
 
 CREATE FUNCTION release_post_deployed() returns trigger as $$
-  begin
-    -- When a release is deployed, check to see if there are
-    -- previous releases in the 'queued' state. If yes, then set their
-    -- state to `skipped_concurrent`.
+begin
+  -- When a release is deployed, check to see if there are
+  -- previous releases in the 'queued' state. If yes, then set their
+  -- state to `skipped_concurrent`.
 
-    update releases set state = 'SKIPPED_CONCURRENT'::release_state
-      where app_uuid=old.app_uuid
-        and state = 'QUEUED'::release_state
-        and id < new.id;
+  update releases set state = 'SKIPPED_CONCURRENT'::release_state
+  where app_uuid=old.app_uuid
+    and state = 'QUEUED'::release_state
+    and id < new.id;
 
-    -- Update all previous releases which are in the state of
-    -- deployed, deploying, terminating to terminated.
-    update releases set state = 'TERMINATED'::release_state
-      where app_uuid=old.app_uuid
-            and state in ('DEPLOYED'::release_state,
-                          'DEPLOYING'::release_state,
-                          'TERMINATING'::release_state)
-            and id < new.id;
+  -- Update all previous releases which are in the state of
+  -- deployed, deploying, terminating to terminated.
+  update releases set state = 'TERMINATED'::release_state
+  where app_uuid=old.app_uuid
+    and state in ('DEPLOYED'::release_state,
+                  'DEPLOYING'::release_state,
+                  'TERMINATING'::release_state)
+    and id < new.id;
 
-    -- Lastly, if there are any new releases in the queued state,
-    -- notify the release channel.
-    if exists (
-              select 1 from releases
-              where app_uuid = old.app_uuid
-              and id > new.id
-              and state = 'QUEUED'::release_state) then
-      perform pg_notify('release', cast(new.app_uuid as text));
-    end if;
-    return null;
-  end;
+  -- Lastly, if there are any new releases in the queued state,
+  -- notify the release channel.
+  if exists (
+      select 1 from releases
+      where app_uuid = old.app_uuid
+        and id > new.id
+        and state = 'QUEUED'::release_state) then
+    perform pg_notify('release', cast(new.app_uuid as text));
+  end if;
+  return null;
+end;
 $$ language plpgsql security definer SET search_path FROM CURRENT;
 
 CREATE TRIGGER _901_releases_queued_check after update on releases
