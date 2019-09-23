@@ -1,1 +1,0 @@
-GRANT INSERT (app_uuid, config, message, payload, always_pull_images, source) ON releases TO asyncy_visitor;
