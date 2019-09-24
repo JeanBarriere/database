@@ -1,4 +1,4 @@
--- Verify storyscript:1 on pg
+-- Verify storyscript:bootstrap on pg
 
 BEGIN;
 

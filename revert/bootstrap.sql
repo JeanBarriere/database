@@ -1,4 +1,4 @@
--- Revert storyscript:1 from pg
+-- Revert storyscript:bootstrap from pg
 
 BEGIN;
 
