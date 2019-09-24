@@ -42,7 +42,7 @@ RUN set -ex \
 		--strip-components 1 \
 	&& rm postgresql.tar.bz2 \
 	\
-	&& curl https://www.postgresql.org/message-id/attachment/104251/pg-dump-policy-trigger-sort_v1.patch | patch -p0 \
+	&& curl https://www.postgresql.org/message-id/attachment/104267/pg-dump-policy-trigger-sort_v2.patch | patch -p0 \
 	\
 	&& apk add --no-cache --virtual .build-deps \
 		bison \
