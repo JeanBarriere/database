@@ -1,4 +1,4 @@
--- Deploy storyscript:bootstrap to pg
+-- Deploy storyscript:1 to pg
 
 BEGIN;
 
