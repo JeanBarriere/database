@@ -21,6 +21,11 @@ $ sqitch deploy db:pg:storyscript
 
 To learn more about sqitch, you can go through its [postgres tutorial](https://sqitch.org/docs/manual/sqitchtutorial/).
 
+## Creating a change
+```bash
+$ sqitch add <change_name>
+```
+
 ## Updating an existing database
 Simply run the following to update your database to the latest version:
 ```bash
