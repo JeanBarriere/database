@@ -16,6 +16,6 @@ $ brew install sqitch --with-postgres-support
 $ sqitch deploy db:pg:storyscript
 ```
 
-`sqitch deploy` takes the [database URI](https://github.com/libwww-perl/uri-db/) as an argument, denoting the target database where you want to deploy changes.
+`sqitch deploy` accepts a [database URI](https://github.com/libwww-perl/uri-db/) argument, denoting the target database where you want to deploy changes.
 
 To learn more about sqitch, you can go through its [postgres tutorial](https://sqitch.org/docs/manual/sqitchtutorial/).
