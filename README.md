@@ -1,37 +1,28 @@
-# Storyscript Cloud's Database
-This is the Storyscript Cloud's database bootstrap tool, which creates the schemas and tables.
+# Storyscript Cloud Database
 
-## Creating the database locally
-1. Ensure you have Postgres installed and running (at least version 10.5)
-2. Install the `make` tool (on macOS, run `xcode-select --install`)
-3. Create the `asyncy` database in Postgres. In the terminal run the following commands:
-  - `psql postgres`
-  - `create database asyncy;`
-  - `\q`
-4. Clone this project
-5. Run `make reset DB=asyncy` in the cloned project
-
-Here's what your output should look like:
-```shell
-$ psql postgres
-psql (10.5)
-Type "help" for help.
-
-postgres=# create database asyncy;
-CREATE DATABASE
-postgres=# \q
-$ make reset DB=asyncy
-...
-...
-$
+## Bootstrapping the database
+1. Install PostgreSQL 9.6.14
+2. Create a database
+```bash
+# The createdb command is a part of the PostgreSQL distribution
+$ createdb storyscript
 ```
-
-## Advanced notes
-If you need to access the database from other than your local network, say from Kubernetes, or a Docker container, you will need to enable access for the `storyscript` database in `pg_hba.conf`. Add the following line to `pg_hba.conf`:
+3. Get [sqitch](https://sqitch.org/download/)
+- For Mac, install it using Homebrew
+```bash
+$ brew tap sqitchers/sqitch
+$ brew install sqitch --with-postgres-support
 ```
-host	asyncy			all				samenet					md5
+4. Checkout this project, and in the checked out directory, use `sqitch` to bootstrap the DB created
+```bash
+$ sqitch deploy db:pg:storyscript
 ```
+`sqitch deploy` accepts a [database URI](https://github.com/libwww-perl/uri-db/) argument, denoting the target database where you want to deploy changes.
 
-**Note 1**: `samenet` matches any address in any subnet that the server is directly connected to (which includes the Kubernetes network).
+To learn more about sqitch, you can go through its [postgres tutorial](https://sqitch.org/docs/manual/sqitchtutorial/).
 
-**Note 2**: You need to create a password for the user accessing the database (this is a Postgres requirement)
+## Updating an existing database
+Simply run the following to update your database to the latest version:
+```bash
+$ sqitch deploy db:pg:storyscript
+```

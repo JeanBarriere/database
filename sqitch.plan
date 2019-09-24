@@ -1,0 +1,5 @@
+%syntax-version=1.0.0
+%project=storyscript
+%uri=https://github.com/storyscript/database
+
+bootstrap 2019-09-23T18:56:51Z Anukul Sangwan <anukulsangwan@icloud.com> # Bootstrap database
