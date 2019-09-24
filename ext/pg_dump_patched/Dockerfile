@@ -42,8 +42,6 @@ RUN set -ex \
 		--strip-components 1 \
 	&& rm postgresql.tar.bz2 \
 	\
-	&& curl https://www.postgresql.org/message-id/attachment/104267/pg-dump-policy-trigger-sort_v2.patch | patch -p0 \
-	\
 	&& apk add --no-cache --virtual .build-deps \
 		bison \
 		coreutils \
@@ -57,6 +55,7 @@ RUN set -ex \
 		libxslt-dev \
 		linux-headers \
 		make \
+		curl \
 #		openldap-dev \
 		openssl-dev \
 # configure: error: prove not found
@@ -71,6 +70,9 @@ RUN set -ex \
 		zlib-dev \
 	\
 	&& cd /usr/src/postgresql \
+	\
+	&& curl https://www.postgresql.org/message-id/attachment/104267/pg-dump-policy-trigger-sort_v2.patch | patch -p1 \
+	\
 # update "DEFAULT_PGSOCKET_DIR" to "/var/run/postgresql" (matching Debian)
 # see https://anonscm.debian.org/git/pkg-postgresql/postgresql.git/tree/debian/patches/51-default-sockets-in-var.patch?id=8b539fcb3e093a521c095e70bdfa76887217b89f
 	&& awk '$1 == "#define" && $2 == "DEFAULT_PGSOCKET_DIR" && $3 == "\"/tmp\"" { $3 = "\"/var/run/postgresql\""; print; next } { print }' src/include/pg_config_manual.h > src/include/pg_config_manual.h.new \
