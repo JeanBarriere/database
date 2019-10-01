@@ -34,8 +34,8 @@ jobs:
       - name: Checkout head commit
         uses: actions/checkout@v1
 
-      - name: Check revert scripts
-        run: bash ci/scripts/check_reverts.sh
+      - name: Check migration scripts
+        run: bash ci/scripts/check_migrations.sh
 
     container:
       image: storyscript/database_ci:9.6.14
