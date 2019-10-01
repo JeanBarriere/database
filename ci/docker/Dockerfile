@@ -1,7 +1,5 @@
-FROM        postgres:9.6.14-alpine
-
-# copy patched pg_dump (sorted output)
-COPY        pg_dumps /usr/local/bin/
+# use postgres:9.6.14-alpine image with patched pg_dump
+FROM        storyscript/pg_dump:9.6.14
 
 # install dependencies for sqitch
 RUN         apk add --update wget make gcc musl-dev tzdata \

@@ -15,8 +15,8 @@ do
   table_excludes=""
   for table in "${tables[@]}"
   do
-    pg_dumps -s -t "${schema}.${table}" "${database_url}" > "${dump_path}/${schema}/${table}.sql"
+    pg_dump -s -t "${schema}.${table}" "${database_url}" > "${dump_path}/${schema}/${table}.sql"
     table_excludes+="-T ${schema}.${table} "
   done
-  pg_dumps -s -n "${schema}" ${table_excludes} "${database_url}" > "${dump_path}/${schema}/_base.sql"
+  pg_dump -s -n "${schema}" ${table_excludes} "${database_url}" > "${dump_path}/${schema}/_base.sql"
 done
