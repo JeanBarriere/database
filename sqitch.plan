@@ -3,3 +3,4 @@
 %uri=https://github.com/storyscript/database
 
 bootstrap 2019-09-23T18:56:51Z Anukul Sangwan <anukulsangwan@icloud.com> # Bootstrap database
+current_owner 2019-10-01T13:40:21Z Jean Barriere <jean@storyscript.io> # Add current owner function to fetch current Owner informations
