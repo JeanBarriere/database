@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-# $ bash dump.sh DATABASE_URL [DUMP_PATH]
-
-set -e
+set -euxo pipefail
 
 database_url="${1}"
 dump_path="${2:-dump}"
