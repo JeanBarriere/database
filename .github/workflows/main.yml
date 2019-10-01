@@ -1,0 +1,47 @@
+name: CI
+
+on: [pull_request, push]
+
+jobs:
+
+  migration_check:
+    name: Migration Check
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout head commit
+        uses: actions/checkout@v1
+
+      - name: Wait for postgres to be ready
+        run: bash ci/scripts/wait-for.sh postgres:5432
+
+      - name: Checkout base branch
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v1
+        with:
+          ref: ${{ github.base_ref }}
+
+      - name: Checkout previous commit
+        if: github.event_name == 'push'
+        uses: actions/checkout@v1
+        with:
+          ref: ${{ github.event.before }}
+
+      - name: Deploy base changes
+        run: sqitch deploy --verify db:pg://$DATABASE_URL
+
+      - name: Checkout head commit
+        uses: actions/checkout@v1
+
+      - name: Check revert scripts
+        run: bash ci/scripts/check_reverts.sh
+
+    container:
+      image: storyscript/database_ci:9.6.14
+      env:
+        DATABASE_URL: postgres:@postgres/postgres
+
+    services:
+      postgres:
+        image: postgres:9.6.14

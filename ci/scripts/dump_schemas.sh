@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-# $ bash dump.sh DATABASE_URL [DUMP_PATH]
-
-set -e
+set -euxo pipefail
 
 database_url="${1}"
 dump_path="${2:-dump}"
@@ -17,8 +15,8 @@ do
   table_excludes=""
   for table in "${tables[@]}"
   do
-    pg_dump -s -t "${schema}.${table}" "${database_url}" > "${dump_path}/${schema}/${table}.sql"
+    pg_dumps -s -t "${schema}.${table}" "${database_url}" > "${dump_path}/${schema}/${table}.sql"
     table_excludes+="-T ${schema}.${table} "
   done
-  pg_dump -s -n "${schema}" ${table_excludes} "${database_url}" > "${dump_path}/${schema}/_base.sql"
+  pg_dumps -s -n "${schema}" ${table_excludes} "${database_url}" > "${dump_path}/${schema}/_base.sql"
 done
