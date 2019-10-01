@@ -2,7 +2,8 @@
 
 BEGIN;
 
-SELECT pg_get_functiondef('current_owner()'::regprocedure);
+#SELECT 1;
+#SELECT pg_get_functiondef('current_owner()'::regprocedure);
 
 
 ROLLBACK;
