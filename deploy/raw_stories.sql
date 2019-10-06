@@ -1,6 +1,6 @@
 -- Deploy storyscript:raw_stories to pg
 
-SET search_path TO :schema;
+SET search_path TO :search_path;
 
 BEGIN;
 
