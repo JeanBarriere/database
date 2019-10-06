@@ -17,7 +17,7 @@ jobs:
       - name: Wait for postgres to be ready
         run: bash ci/scripts/wait-for.sh postgres:5432
 
-      - name: Checkout previous commit
+      - name: Checkout base commit
         uses: actions/checkout@v1
         with:
           ref: ${{ github.base_ref || github.event.before }}
