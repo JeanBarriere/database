@@ -7,7 +7,7 @@ jobs:
   migration_check:
     name: Migration Check
     runs-on: ubuntu-latest
-    if: github.base_ref == 'master' || github.ref == 'master'
+    if: github.base_ref == 'master' || github.ref == 'refs/heads/master'
 
     steps:
 
