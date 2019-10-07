@@ -1,4 +1,4 @@
--- Revert storyscript:source_code_rls from pg
+-- Revert storyscript:add_source_code_rls from pg
 
 SET search_path TO :search_path;
 

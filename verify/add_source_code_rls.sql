@@ -1,4 +1,4 @@
--- Verify storyscript:source_code_rls on pg
+-- Verify storyscript:add_source_code_rls on pg
 
 SET search_path TO :search_path;
 

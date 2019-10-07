@@ -1,4 +1,4 @@
--- Deploy storyscript:source_code_rls to pg
+-- Deploy storyscript:add_source_code_rls to pg
 
 SET search_path TO :search_path;
 
