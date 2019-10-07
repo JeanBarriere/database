@@ -4,3 +4,4 @@
 
 bootstrap 2019-09-23T18:56:51Z Anukul Sangwan <anukulsangwan@icloud.com> # Bootstrap database
 source_code 2019-10-06T05:30:42Z Anukul Sangwan <anukulsangwan@icloud.com> # Store release source code
+source_code_rls 2019-10-07T13:00:24Z Anukul Sangwan <anukulsangwan@icloud.com> # Allow inserting releases.source_code
