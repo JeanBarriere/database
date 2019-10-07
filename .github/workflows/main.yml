@@ -7,6 +7,7 @@ jobs:
   migration_check:
     name: Migration Check
     runs-on: ubuntu-latest
+    if: github.base_ref == 'master' || github.ref == 'refs/heads/master'
 
     steps:
 
@@ -16,17 +17,10 @@ jobs:
       - name: Wait for postgres to be ready
         run: bash ci/scripts/wait-for.sh postgres:5432
 
-      - name: Checkout base branch
-        if: github.event_name == 'pull_request'
+      - name: Checkout base commit
         uses: actions/checkout@v1
         with:
-          ref: ${{ github.base_ref }}
-
-      - name: Checkout previous commit
-        if: github.event_name == 'push'
-        uses: actions/checkout@v1
-        with:
-          ref: ${{ github.event.before }}
+          ref: ${{ github.base_ref || github.event.before }}
 
       - name: Deploy base changes
         run: sqitch deploy --verify db:pg://$DATABASE_URL
