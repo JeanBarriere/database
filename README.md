@@ -47,9 +47,7 @@ say from Kubernetes, or a Docker container, you will need to enable
 access for the `storyscript` database in `pg_hba.conf`.
 Add the following line to `pg_hba.conf`:
 ```
-host	storyscript			all				samenet					md5
+host	storyscript			all				samenet					trust
 ```
 
 **Note 1**: `samenet` matches any address in any subnet that the server is directly connected to (which includes the Kubernetes network).
-
-**Note 2**: You need to create a password for the user accessing the database (this is a Postgres requirement)
