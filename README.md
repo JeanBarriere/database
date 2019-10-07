@@ -26,6 +26,15 @@ To learn more about sqitch, you can go through its [postgres tutorial](https://s
 $ sqitch add <change_name>
 ```
 
+Remember to set the search path in all of deploy, verify and revert scripts.
+```sql
+SET search_path TO :search_path;
+
+BEGIN;
+
+-- XXX Add DDLs here.
+```
+This variable is set in `sqitch.conf`.
 ## Updating an existing database
 Simply run the following to update your database to the latest version:
 ```bash
