@@ -1,5 +1,7 @@
 # Storyscript Cloud Database
 
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg?style=for-the-badge)](https://github.com/storyscript/.github/blob/master/CODE_OF_CONDUCT.md)
+
 ## Bootstrapping the database
 1. Install PostgreSQL 9.6.14
 2. Create a database
