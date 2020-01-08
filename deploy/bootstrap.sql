@@ -10,23 +10,17 @@ CREATE SCHEMA app_hidden;
 CREATE SCHEMA app_private;
 CREATE SCHEMA app_runtime;
 SET search_path to app_public, app_hidden, app_private, app_runtime, public;
+CREATE ROLE asyncy_visitor;
 DO $$
     BEGIN
-        IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname = 'asyncy_authenticator') THEN
-            CREATE ROLE asyncy_authenticator WITH LOGIN PASSWORD 'PLEASE_CHANGE_ME' NOINHERIT;
-        END IF;
-        IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname = 'asyncy_visitor') THEN
-            CREATE ROLE asyncy_visitor;
-        END IF;
-    END;
-$$ LANGUAGE plpgsql;
-GRANT asyncy_visitor to asyncy_authenticator;
-DO $$
-    BEGIN
-        EXECUTE FORMAT('GRANT CONNECT ON DATABASE %I TO asyncy_authenticator', current_database());
+        EXECUTE FORMAT('CREATE ROLE "%s" WITH LOGIN PASSWORD ''%s'' NOINHERIT',
+                        current_setting('storyscript.graphql_authenticator_username'),
+                        current_setting('storyscript.graphql_authenticator_password'));
+        EXECUTE FORMAT('GRANT asyncy_visitor to "%s"', current_setting('storyscript.graphql_authenticator_username'));
+        EXECUTE FORMAT('GRANT CONNECT ON DATABASE %I TO "%s"',
+                        current_database(), current_setting('storyscript.graphql_authenticator_username'));
     END;
 $$;
-GRANT CONNECT ON DATABASE postgres TO asyncy_authenticator;
 GRANT USAGE ON SCHEMA app_public TO asyncy_visitor;
 GRANT USAGE ON SCHEMA app_hidden TO asyncy_visitor;
 CREATE TABLE app_private.version (
