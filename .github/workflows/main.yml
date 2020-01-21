@@ -1,13 +1,17 @@
 name: CI
 
-on: [pull_request, push]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
-
   migration_check:
     name: Migration Check
     runs-on: ubuntu-latest
-    if: (github.base_ref == 'master' && !endsWith(github.head_ref, '-noci')) || github.ref == 'refs/heads/master'
 
     steps:
 
