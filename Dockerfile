@@ -4,4 +4,4 @@ COPY        . /database
 
 WORKDIR     /database
 
-ENTRYPOINT  sqitch deploy $DATABASE_URL
+ENTRYPOINT  ./docker-entrypoint.sh
