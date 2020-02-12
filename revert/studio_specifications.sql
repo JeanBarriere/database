@@ -878,12 +878,6 @@ for select
 using (public);
 grant select on "app_public"."services" to visitor;
 
-CREATE POLICY delete_admin ON team_apps FOR DELETE USING
-    (current_owner_has_organization_permission((SELECT owner_uuid FROM teams WHERE teams.uuid = team_uuid), 'ADMIN'));
-GRANT DELETE ON team_apps TO visitor;
-ALTER TABLE permissions ENABLE ROW LEVEL SECURITY;
-
-
 CREATE TRIGGER _100_app_updated_notify AFTER UPDATE ON app_public.apps FOR EACH ROW WHEN (((old.maintenance IS DISTINCT FROM new.maintenance) OR (new.deleted = true))) EXECUTE PROCEDURE app_public.app_updated_notify();
 
 CREATE TRIGGER _100_builds_next_id_insert BEFORE INSERT ON app_public.builds FOR EACH ROW EXECUTE PROCEDURE app_public.builds_next_id();
