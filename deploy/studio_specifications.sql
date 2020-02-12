@@ -250,8 +250,6 @@ drop table "app_public"."owner_vcs";
 
 drop table "app_public"."service_plans";
 
-drop table "app_public"."service_tags";
-
 drop table "app_public"."service_usage";
 
 drop table "app_runtime"."subscriptions";
@@ -273,7 +271,7 @@ alter table "app_public"."apps" drop column "repo_uuid";
 
 alter table "app_public"."owners" drop column "marketing_source_uuid";
 
-alter table "app_public"."owners" add column "sso_github_id" citext not null;
+alter table "app_public"."owners" add column "sso_github_id" citext;
 
 alter table "app_public"."releases" drop column "always_pull_images";
 
@@ -301,7 +299,14 @@ alter table "app_public"."services" drop column "repo_uuid";
 
 alter table "app_public"."services" drop column "type";
 
-alter table "app_public"."services" add column "configuration" jsonb not null;
+-- moved services.tags.configuration to services.configuration before setting default to null
+alter table "app_public"."services" add column "configuration" jsonb;
+UPDATE "app_public"."services" SET "configuration" = "tags"."configuration" FROM "app_public"."service_tags" as "tags" WHERE "app_public"."services"."uuid" = "tags"."service_uuid";
+
+alter table "app_public"."services" alter column "configuration" set not null;
+
+drop table "app_public"."service_tags";
+
 
 set check_function_bodies = off;
 
