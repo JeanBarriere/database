@@ -284,6 +284,33 @@ drop table releases cascade;
 
 alter table releases_new rename to releases;
 
+COMMENT on table releases is 'Identifying the active version of the application.';
+COMMENT on column releases.app_uuid is 'The application this release belongs to.';
+COMMENT on column releases.id is 'The release number of this release (within this app).';
+COMMENT on column releases.config is 'Configuration of the release.';
+COMMENT on column releases.message is 'User defined release message.';
+COMMENT on column releases.owner_uuid is 'The person who submitted the release.';
+COMMENT on column releases.timestamp is 'Time when release was first created.';
+COMMENT on column releases.state is 'Identifying which release is active or rolling in/out.';
+COMMENT on column releases.source is 'Identifying the cause of this release, whether it was because of a config change, a code update, or a rollback.';
+COMMENT on column releases.payload is 'An object containing the full payload of Storyscripts, e.g., {"foobar": {"1": ...}}';
+
+alter table releases rename constraint "releases_new_pkey" to "releases_pkey";
+alter table releases rename constraint "releases_new_app_uuid_fkey" to "releases_app_uuid_fkey";
+alter table releases rename constraint "releases_new_owner_uuid_fkey" to "releases_owner_uuid_fkey";
+
+CREATE POLICY insert_permission ON app_public.releases FOR INSERT TO PUBLIC WITH CHECK (app_hidden.current_owner_has_app_permission(app_uuid, 'CREATE_RELEASE'::text));
+CREATE POLICY select_app ON app_public.releases FOR SELECT TO PUBLIC USING ((EXISTS ( SELECT 1 FROM app_public.apps WHERE (apps.uuid = releases.app_uuid))));
+
+CREATE TRIGGER _050_releases_check_app_if_app_deleted BEFORE INSERT ON app_public.releases FOR EACH ROW EXECUTE PROCEDURE app_public.releases_check_app_if_app_deleted();
+CREATE TRIGGER _100_releases_next_id_insert BEFORE INSERT ON app_public.releases FOR EACH ROW EXECUTE PROCEDURE app_public.releases_next_id();
+CREATE TRIGGER _900_releases_notify AFTER INSERT ON app_public.releases FOR EACH ROW EXECUTE PROCEDURE app_public.releases_notify();
+CREATE TRIGGER _901_releases_queued_check AFTER UPDATE ON app_public.releases FOR EACH ROW WHEN (((old.state IS DISTINCT FROM new.state) AND (new.state = 'DEPLOYED'::app_public.release_state))) EXECUTE PROCEDURE app_public.release_post_deployed();
+
+ALTER TABLE app_public.releases ENABLE ROW LEVEL SECURITY;
+
+GRANT SELECT ON TABLE app_public.releases TO visitor;
+
 -- alter table "app_public"."releases" add column "always_pull_images" boolean not null default false;
 
 -- alter table "app_public"."releases" add column "config" jsonb;
