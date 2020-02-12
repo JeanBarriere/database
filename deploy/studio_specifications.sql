@@ -246,8 +246,6 @@ drop table "app_public"."marketing_sources";
 
 drop table "app_public"."owner_containerconfigs";
 
-drop table "app_public"."owner_vcs";
-
 drop table "app_public"."service_plans";
 
 drop table "app_public"."service_usage";
@@ -278,8 +276,7 @@ UPDATE "app_public"."owners" SET "sso_github_id" = "vcs"."service_id" FROM "app_
 
 alter table "app_public"."owners" alter column "sso_github_id" set not null;
 
-
-alter table "app_public"."owners" add column "sso_github_id" citext not null;
+drop table "app_public"."owner_vcs";
 
 alter table "app_public"."releases" drop column "always_pull_images";
 

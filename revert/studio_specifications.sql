@@ -181,7 +181,7 @@ alter table "app_public"."releases" add column "always_pull_images" boolean not 
 
 alter table "app_public"."releases" add column "config" jsonb;
 
-alter table "app_public"."releases" add column "message" text not null;
+alter table "app_public"."releases" add column "message" text not null default 'released';
 
 alter table "app_public"."releases" add column "payload" jsonb default '{"__default__": "true"}'::jsonb;
 
@@ -195,7 +195,7 @@ alter table "app_public"."services" add column "is_certified" boolean not null d
 
 alter table "app_public"."services" add column "links" jsonb;
 
-alter table "app_public"."services" add column "owner_uuid" uuid not null;
+alter table "app_public"."services" add column "owner_uuid" uuid;
 
 alter table "app_public"."services" add column "public" boolean not null default false;
 
