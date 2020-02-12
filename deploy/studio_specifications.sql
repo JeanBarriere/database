@@ -271,7 +271,15 @@ alter table "app_public"."apps" drop column "repo_uuid";
 
 alter table "app_public"."owners" drop column "marketing_source_uuid";
 
+-- push sso_github_id from old owner_vcs.service_id place
 alter table "app_public"."owners" add column "sso_github_id" citext;
+
+UPDATE "app_public"."owners" SET "sso_github_id" = "vcs"."service_id" FROM "app_public"."owner_vcs" as "vcs" WHERE "app_public"."owners"."uuid" = "vcs"."owner_uuid";
+
+alter table "app_public"."owners" alter column "sso_github_id" set not null;
+
+
+alter table "app_public"."owners" add column "sso_github_id" citext not null;
 
 alter table "app_public"."releases" drop column "always_pull_images";
 
