@@ -278,7 +278,7 @@ CREATE TABLE releases_new(
                          primary key (app_uuid, id)
 );
 
-insert into releases_new select app_uuid, id, null, 'released', owner_uuid, timestamp, null, state, source, false, source_code from releases;
+insert into releases_new select app_uuid, id, null, 'released', owner_uuid, timestamp, null, state, null, false, source_code from releases;
 
 drop table releases cascade;
 
