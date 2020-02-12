@@ -218,15 +218,15 @@ alter table "app_public"."owners" drop column "sso_github_id";
 
 alter table "app_public"."owners" add column "marketing_source_uuid" uuid;
 
-alter table "app_public"."releases" add column "always_pull_images" after source boolean not null default false;
+alter table "app_public"."releases" add column "always_pull_images" boolean not null default false;
 
-alter table "app_public"."releases" add column "config" after id jsonb;
+alter table "app_public"."releases" add column "config" jsonb;
 COMMENT on column releases.config is 'Configuration of the release.';
 
-alter table "app_public"."releases" add column "message" after config text not null default 'released';
+alter table "app_public"."releases" add column "message" text not null default 'released';
 COMMENT on column releases.message is 'User defined release message.';
 
-alter table "app_public"."releases" add column "payload" before state jsonb default '{"__default__": "true"}'::jsonb;
+alter table "app_public"."releases" add column "payload" jsonb default '{"__default__": "true"}'::jsonb;
 COMMENT on column releases.payload is 'An object containing the full payload of Storyscripts, e.g., {"foobar": {"1": ...}}';
 
 alter table "app_public"."releases" add column "source" app_public.release_source not null default 'CODE_UPDATE'::app_public.release_source;
