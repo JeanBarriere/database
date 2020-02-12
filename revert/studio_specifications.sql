@@ -24,27 +24,11 @@ drop policy "select_public" on "app_public"."services";
 
 drop function if exists "app_private"."create_owner_by_login"(service app_public.sso_service, service_id text, username app_public.username, name text, email app_public.email, profile_image_url text);
 
-
-create table "app_public"."owner_vcs" (
-    "uuid" uuid not null default uuid_generate_v4() primary key,
-    "owner_uuid" uuid references owners on delete set null,
+create table "app_hidden"."repos" (
+    "uuid" uuid not null default uuid_generate_v4(),
+    "owner_vcs_uuid" uuid not null,
     "service" app_public.git_service not null default 'github'::app_public.git_service,
     "service_id" citext not null,
-    "username" citext not null,
-    "createstamp" timestamp with time zone not null default now(),
-    "github_installation_id" integer
-);
-COMMENT on column app_public.owner_vcs.username is 'The handler name to the provider service';
-COMMENT on column app_public.owner_vcs.owner_uuid is 'A user can attach a vcs to their profile, this is for users-only, not organizations.';
-COMMENT on column app_public.owner_vcs.service is 'GitHub or another provider';
-COMMENT on column app_public.owner_vcs.service_id is 'The providers unique id';
-COMMENT on column app_public.owner_vcs.github_installation_id is 'The installation id to the GitHub App';
-
-create table "app_hidden"."repos" (
-    "uuid" uuid not null default uuid_generate_v4() primary key,
-    "owner_vcs_uuid" uuid references owner_vcs on delete cascade not null,
-    "service" app_public.git_service not null default 'github'::app_public.git_service,
-    "service_id" citext unique CHECK (LENGTH(service_id) < 45) not null,
     "name" citext not null,
     "using_github_installation" boolean not null default false
 );
@@ -133,6 +117,23 @@ create table "app_public"."owner_containerconfigs" (
 COMMENT on column owner_containerconfigs.containerconfig is 'Container config containing the auth credentials';
 
 
+create table "app_public"."owner_vcs" (
+    "uuid" uuid not null default uuid_generate_v4(),
+    "owner_uuid" uuid,
+    "service" app_public.git_service not null default 'github'::app_public.git_service,
+    "service_id" citext not null,
+    "username" citext not null,
+    "createstamp" timestamp with time zone not null default now(),
+    "github_installation_id" integer
+);
+COMMENT on column app_public.owner_vcs.username is 'The handler name to the provider service';
+COMMENT on column app_public.owner_vcs.owner_uuid is 'A user can attach a vcs to their profile, this is for users-only, not organizations.';
+COMMENT on column app_public.owner_vcs.service is 'GitHub or another provider';
+COMMENT on column app_public.owner_vcs.service_id is 'The providers unique id';
+COMMENT on column app_public.owner_vcs.github_installation_id is 'The installation id to the GitHub App';
+
+
+
 create table "app_public"."service_plans" (
     "uuid" uuid not null default uuid_generate_v4(),
     "service_uuid" uuid not null,
@@ -205,37 +206,6 @@ AND enumtypid = (
 
 -- -- remove old type
 -- drop type "app_public"."release_state_old"
-
-CREATE TABLE apps_new(
-                     uuid                    uuid default uuid_generate_v4() primary key,
-                     owner_uuid              uuid references owners on delete cascade not null default current_owner_uuid(),
-                     repo_uuid               uuid references app_hidden.repos on delete cascade,
-                     name                    title not null,
-                     timestamp               timestamptz not null default now(),
-                     maintenance             boolean default false not null,
-                     deleted                 boolean default false not null,
-                     environment             environment not null default 'PRODUCTION'::environment,
-                     UNIQUE (owner_uuid, name)
-);
-
-insert into apps_new select uuid, owner_uuid, null, name, timestamp, deleted from apps;
-
-drop table apps cascade;
-
-alter table apps_new rename to apps;
-
-alter table apps rename constraint "apps_new_owner_uuid_fkey" to "apps_owner_uuid_fkey";
-alter table apps rename constraint "apps_new_repo_uuid_fkey" to "apps_repo_uuid_fkey";
-
--- alter table "app_public"."apps" add column "environment" app_public.environment not null default 'PRODUCTION'::app_public.environment;
-
--- alter table "app_public"."apps" add column "maintenance" boolean not null default false;
-
--- alter table "app_public"."apps" add column "repo_uuid" uuid;
-COMMENT on table apps is 'Owned by an org, an App is a group of Repos that make up an application.';
-COMMENT on column apps.timestamp is 'Date the application was created.';
-COMMENT on column apps.owner_uuid is 'The Owner that owns this application.';
-COMMENT on column apps.repo_uuid is 'The Repository linked to this application.';
 
 alter table "app_public"."owners" drop column "sso_github_id";
 
@@ -776,6 +746,39 @@ alter table "app_public"."services" add constraint "services_owner_uuid_fkey" FO
 alter table "app_public"."services" add constraint "services_repo_uuid_fkey" FOREIGN KEY (repo_uuid) REFERENCES app_hidden.repos(uuid) ON DELETE CASCADE;
 
 alter table "app_runtime"."subscriptions" add constraint "subscriptions_app_uuid_fkey" FOREIGN KEY (app_uuid) REFERENCES app_public.apps(uuid) ON DELETE CASCADE;
+
+
+CREATE TABLE apps_new(
+                     uuid                    uuid default uuid_generate_v4() primary key,
+                     owner_uuid              uuid references owners on delete cascade not null default current_owner_uuid(),
+                     repo_uuid               uuid references repos on delete cascade,
+                     name                    title not null,
+                     timestamp               timestamptz not null default now(),
+                     maintenance             boolean default false not null,
+                     deleted                 boolean default false not null,
+                     environment             environment not null default 'PRODUCTION'::environment,
+                     UNIQUE (owner_uuid, name)
+);
+
+insert into apps_new select uuid, owner_uuid, name, timestamp, deleted from apps;
+
+drop table apps cascade;
+
+alter table apps_new rename to apps;
+
+alter table apps rename constraint "apps_new_owner_uuid_fkey" to "apps_owner_uuid_fkey";
+alter table apps rename constraint "apps_new_repo_uuid_fkey" to "apps_repo_uuid_fkey";
+
+-- alter table "app_public"."apps" add column "environment" app_public.environment not null default 'PRODUCTION'::app_public.environment;
+
+-- alter table "app_public"."apps" add column "maintenance" boolean not null default false;
+
+-- alter table "app_public"."apps" add column "repo_uuid" uuid;
+COMMENT on table apps is 'Owned by an org, an App is a group of Repos that make up an application.';
+COMMENT on column apps.timestamp is 'Date the application was created.';
+COMMENT on column apps.owner_uuid is 'The Owner that owns this application.';
+COMMENT on column apps.repo_uuid is 'The Repository linked to this application.';
+
 
 create policy "select_member"
 on "app_private"."owner_billing"
