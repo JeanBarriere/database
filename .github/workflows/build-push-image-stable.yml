@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - stable
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -12,10 +14,10 @@ jobs:
       - uses: actions/checkout@v1
       - name: Get the tag
         id: get_tag
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
       - uses: mr-smithers-excellent/docker-build-push@v2
         with:
-          image: storyscript/database
+          image: storyscript/schema
           tag: lts
           registry: docker.io
           dockerfile: Dockerfile
@@ -23,7 +25,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - uses: mr-smithers-excellent/docker-build-push@v2
         with:
-          image: storyscript/database
+          image: storyscript/schema
           tag: ${{ steps.get_tag.outputs.VERSION }}
           registry: docker.io
           dockerfile: Dockerfile
