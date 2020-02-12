@@ -301,7 +301,7 @@ drop table services cascade;
 
 alter table services_new rename to services;
 
-alter table apps rename constraint "services_new_category_fkey" to "services_category_fkey";
+alter table services rename constraint "services_new_category_fkey" to "services_category_fkey";
 alter table services rename constraint "services_new_pkey" to "services_pkey";
 COMMENT on column services.name is 'The namespace used for the project slug (org/service).';
 COMMENT on column services.alias is 'The namespace reservation for the service';
