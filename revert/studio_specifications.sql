@@ -218,7 +218,7 @@ CREATE TABLE apps_new(
                      UNIQUE (owner_uuid, name)
 );
 
-insert into apps_new select uuid, owner_uuid, name, timestamp, deleted from apps;
+insert into apps_new select uuid, owner_uuid, null, name, timestamp, deleted from apps;
 
 drop table apps cascade;
 
