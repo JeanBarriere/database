@@ -95,6 +95,9 @@ create table "app_public"."external_service_metadata" (
     "properties" jsonb not null,
     "last_seen_hash" text not null
 );
+COMMENT on column external_service_metadata.document_uri is 'The URI of the OpenAPI document';
+COMMENT on column external_service_metadata.properties is 'The properties submitted at service creation, provided to the OMG converter alongside the document';
+COMMENT on column external_service_metadata.last_seen_hash is 'The hash of the document when last converted (in either success or failure cases)';
 
 
 create table "app_public"."marketing_sources" (
@@ -215,13 +218,16 @@ alter table "app_public"."owners" drop column "sso_github_id";
 
 alter table "app_public"."owners" add column "marketing_source_uuid" uuid;
 
-alter table "app_public"."releases" add column "always_pull_images" boolean not null default false;
+alter table "app_public"."releases" add column "always_pull_images" after source boolean not null default false;
 
-alter table "app_public"."releases" add column "config" jsonb;
+alter table "app_public"."releases" add column "config" after id jsonb;
+COMMENT on column releases.config is 'Configuration of the release.';
 
-alter table "app_public"."releases" add column "message" text not null default 'released';
+alter table "app_public"."releases" add column "message" after config text not null default 'released';
+COMMENT on column releases.message is 'User defined release message.';
 
-alter table "app_public"."releases" add column "payload" jsonb default '{"__default__": "true"}'::jsonb;
+alter table "app_public"."releases" add column "payload" before state jsonb default '{"__default__": "true"}'::jsonb;
+COMMENT on column releases.payload is 'An object containing the full payload of Storyscripts, e.g., {"foobar": {"1": ...}}';
 
 alter table "app_public"."releases" add column "source" app_public.release_source not null default 'CODE_UPDATE'::app_public.release_source;
 
@@ -871,6 +877,12 @@ on "app_public"."services"
 for select
 using (public);
 grant select on "app_public"."services" to visitor;
+
+CREATE POLICY delete_admin ON team_apps FOR DELETE USING
+    (current_owner_has_organization_permission((SELECT owner_uuid FROM teams WHERE teams.uuid = team_uuid), 'ADMIN'));
+GRANT DELETE ON team_apps TO visitor;
+ALTER TABLE permissions ENABLE ROW LEVEL SECURITY;
+
 
 CREATE TRIGGER _100_app_updated_notify AFTER UPDATE ON app_public.apps FOR EACH ROW WHEN (((old.maintenance IS DISTINCT FROM new.maintenance) OR (new.deleted = true))) EXECUTE PROCEDURE app_public.app_updated_notify();
 
