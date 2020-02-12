@@ -237,14 +237,14 @@ ALTER TABLE ONLY app_public.team_apps ADD CONSTRAINT team_apps_app_uuid_fkey FOR
 
 ALTER TABLE app_public.apps ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY insert_organization ON app_public.apps FOR INSERT TO visitor WITH CHECK (app_hidden.current_owner_has_organization_permission(owner_uuid, 'CREATE_APP'::text));
-CREATE POLICY insert_own ON app_public.apps FOR INSERT TO visitor WITH CHECK ((owner_uuid = app_hidden.current_owner_uuid()));
-CREATE POLICY select_app ON app_public.app_dns FOR SELECT TO visitor USING ((EXISTS ( SELECT 1 FROM app_public.apps WHERE (apps.uuid = app_dns.app_uuid))));
-CREATE POLICY select_app ON app_public.releases FOR SELECT TO visitor USING ((EXISTS ( SELECT 1 FROM app_public.apps WHERE (apps.uuid = releases.app_uuid))));
-CREATE POLICY select_organization ON app_public.apps FOR SELECT TO visitor USING ((owner_uuid = ANY (app_hidden.current_owner_organization_uuids())));
-CREATE POLICY select_own ON app_public.apps FOR SELECT TO visitor USING ((owner_uuid = app_hidden.current_owner_uuid()));
-CREATE POLICY update_organization ON app_public.apps FOR UPDATE TO visitor USING (app_hidden.current_owner_has_organization_permission(owner_uuid, 'CREATE_APP'::text));
-CREATE POLICY update_own ON app_public.apps FOR UPDATE TO visitor USING ((owner_uuid = app_hidden.current_owner_uuid()));
+CREATE POLICY insert_organization ON app_public.apps FOR INSERT TO PUBLIC WITH CHECK (app_hidden.current_owner_has_organization_permission(owner_uuid, 'CREATE_APP'::text));
+CREATE POLICY insert_own ON app_public.apps FOR INSERT TO PUBLIC WITH CHECK ((owner_uuid = app_hidden.current_owner_uuid()));
+CREATE POLICY select_app ON app_public.app_dns FOR SELECT TO PUBLIC USING ((EXISTS ( SELECT 1 FROM app_public.apps WHERE (apps.uuid = app_dns.app_uuid))));
+CREATE POLICY select_app ON app_public.releases FOR SELECT TO PUBLIC USING ((EXISTS ( SELECT 1 FROM app_public.apps WHERE (apps.uuid = releases.app_uuid))));
+CREATE POLICY select_organization ON app_public.apps FOR SELECT TO PUBLIC USING ((owner_uuid = ANY (app_hidden.current_owner_organization_uuids())));
+CREATE POLICY select_own ON app_public.apps FOR SELECT TO PUBLIC USING ((owner_uuid = app_hidden.current_owner_uuid()));
+CREATE POLICY update_organization ON app_public.apps FOR UPDATE TO PUBLIC USING (app_hidden.current_owner_has_organization_permission(owner_uuid, 'CREATE_APP'::text));
+CREATE POLICY update_own ON app_public.apps FOR UPDATE TO PUBLIC USING ((owner_uuid = app_hidden.current_owner_uuid()));
 GRANT SELECT,INSERT,UPDATE ON TABLE app_public.apps TO visitor;
 
 -- alter table "app_public"."apps" add column "environment" app_public.environment not null default 'PRODUCTION'::app_public.environment;
