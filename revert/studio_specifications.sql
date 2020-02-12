@@ -329,7 +329,7 @@ GRANT SELECT ON TABLE app_public.releases TO visitor;
 CREATE TABLE services_new(
                          uuid                       uuid default uuid_generate_v4() primary key,
                          repo_uuid                  uuid,
-                         owner_uuid                 uuid,
+                         owner_uuid                 uuid not null,
                          name                       alias not null,
                          category                   uuid references service_categories on delete set null,
                          description                text,
