@@ -304,7 +304,7 @@ CREATE TABLE services_new(
                          name                       alias not null,
                          category                   uuid references service_categories on delete set null,
                          description                text,
-                         alias                      alias unique,
+                         alias                      alias,
                          pull_url                   text,
                          topics                     citext[],
                          is_certified               boolean not null default false,
@@ -324,7 +324,6 @@ alter table services_new rename to services;
 alter table services rename constraint "services_new_category_fkey" to "services_category_fkey";
 alter table services rename constraint "services_new_pkey" to "services_pkey";
 
-ALTER TABLE ONLY app_public.services ADD CONSTRAINT services_new_alias_key UNIQUE (alias);
 CREATE INDEX services_tsvector_idx ON app_public.services USING gin (tsvector);
 CREATE TRIGGER _200_update_tsvector_insert BEFORE INSERT ON app_public.services FOR EACH ROW EXECUTE PROCEDURE app_public.services__update_tsvector();
 CREATE TRIGGER _200_update_tsvector_update BEFORE UPDATE ON app_public.services FOR EACH ROW WHEN ((new.topics IS DISTINCT FROM old.topics)) EXECUTE PROCEDURE app_public.services__update_tsvector();
