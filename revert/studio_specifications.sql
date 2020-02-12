@@ -817,7 +817,7 @@ for insert
 with check (owner_uuid = app_hidden.current_owner_uuid());
 grant insert on "app_public"."owner_containerconfigs" to visitor;
 
-GRANT INSERT (app_uuid, config, message, payload, always_pull_images, source) ON releases TO visitor;
+GRANT INSERT (config, message, payload, always_pull_images) ON releases TO visitor;
 
 create policy "select_organization"
 on "app_public"."owner_containerconfigs"
