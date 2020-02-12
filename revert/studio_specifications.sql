@@ -24,11 +24,27 @@ drop policy "select_public" on "app_public"."services";
 
 drop function if exists "app_private"."create_owner_by_login"(service app_public.sso_service, service_id text, username app_public.username, name text, email app_public.email, profile_image_url text);
 
-create table "app_hidden"."repos" (
-    "uuid" uuid not null default uuid_generate_v4(),
-    "owner_vcs_uuid" uuid not null,
+
+create table "app_public"."owner_vcs" (
+    "uuid" uuid not null default uuid_generate_v4() primary key,
+    "owner_uuid" uuid references owners on delete set null,
     "service" app_public.git_service not null default 'github'::app_public.git_service,
     "service_id" citext not null,
+    "username" citext not null,
+    "createstamp" timestamp with time zone not null default now(),
+    "github_installation_id" integer
+);
+COMMENT on column app_public.owner_vcs.username is 'The handler name to the provider service';
+COMMENT on column app_public.owner_vcs.owner_uuid is 'A user can attach a vcs to their profile, this is for users-only, not organizations.';
+COMMENT on column app_public.owner_vcs.service is 'GitHub or another provider';
+COMMENT on column app_public.owner_vcs.service_id is 'The providers unique id';
+COMMENT on column app_public.owner_vcs.github_installation_id is 'The installation id to the GitHub App';
+
+create table "app_hidden"."repos" (
+    "uuid" uuid not null default uuid_generate_v4() primary key,
+    "owner_vcs_uuid" uuid references owner_vcs on delete cascade not null,
+    "service" app_public.git_service not null default 'github'::app_public.git_service,
+    "service_id" citext unique CHECK (LENGTH(service_id) < 45) not null,
     "name" citext not null,
     "using_github_installation" boolean not null default false
 );
@@ -117,23 +133,6 @@ create table "app_public"."owner_containerconfigs" (
 COMMENT on column owner_containerconfigs.containerconfig is 'Container config containing the auth credentials';
 
 
-create table "app_public"."owner_vcs" (
-    "uuid" uuid not null default uuid_generate_v4(),
-    "owner_uuid" uuid,
-    "service" app_public.git_service not null default 'github'::app_public.git_service,
-    "service_id" citext not null,
-    "username" citext not null,
-    "createstamp" timestamp with time zone not null default now(),
-    "github_installation_id" integer
-);
-COMMENT on column app_public.owner_vcs.username is 'The handler name to the provider service';
-COMMENT on column app_public.owner_vcs.owner_uuid is 'A user can attach a vcs to their profile, this is for users-only, not organizations.';
-COMMENT on column app_public.owner_vcs.service is 'GitHub or another provider';
-COMMENT on column app_public.owner_vcs.service_id is 'The providers unique id';
-COMMENT on column app_public.owner_vcs.github_installation_id is 'The installation id to the GitHub App';
-
-
-
 create table "app_public"."service_plans" (
     "uuid" uuid not null default uuid_generate_v4(),
     "service_uuid" uuid not null,
@@ -210,7 +209,7 @@ AND enumtypid = (
 CREATE TABLE apps_new(
                      uuid                    uuid default uuid_generate_v4() primary key,
                      owner_uuid              uuid references owners on delete cascade not null default current_owner_uuid(),
-                     repo_uuid               uuid references repos on delete cascade,
+                     repo_uuid               uuid references app_hidden.repos on delete cascade,
                      name                    title not null,
                      timestamp               timestamptz not null default now(),
                      maintenance             boolean default false not null,
