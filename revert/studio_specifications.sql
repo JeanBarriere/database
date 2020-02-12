@@ -265,9 +265,9 @@ alter table "app_public"."owners" add column "marketing_source_uuid" uuid;
 
 CREATE TABLE releases_new(
                          app_uuid                uuid references apps on delete cascade not null,
-                         id                      int CHECK (id > 0) not null default 0,
+                         id                      int,
                          config                  jsonb,
-                         message                 text CHECK (LENGTH(message) < 1000) not null,
+                         message                 text,
                          owner_uuid              uuid not null default current_owner_uuid() references owners on delete set null,
                          timestamp               timestamptz not null default now(),
                          payload                 jsonb default '{"__default__": "true"}'::jsonb,
@@ -294,6 +294,7 @@ COMMENT on column releases.timestamp is 'Time when release was first created.';
 COMMENT on column releases.state is 'Identifying which release is active or rolling in/out.';
 COMMENT on column releases.source is 'Identifying the cause of this release, whether it was because of a config change, a code update, or a rollback.';
 COMMENT on column releases.payload is 'An object containing the full payload of Storyscripts, e.g., {"foobar": {"1": ...}}';
+COMMENT ON COLUMN releases.source_code IS 'A collection of the raw stories deployed. The key is the path to the story from the project root, and the value is a new line delimited story. Example: {"path/to/mystory.story": "line1\nline2"}';
 
 alter table releases rename constraint "releases_new_pkey" to "releases_pkey";
 alter table releases rename constraint "releases_new_app_uuid_fkey" to "releases_app_uuid_fkey";
@@ -930,7 +931,7 @@ for insert
 with check (owner_uuid = app_hidden.current_owner_uuid());
 grant insert on "app_public"."owner_containerconfigs" to visitor;
 
-GRANT INSERT (config, message, payload, always_pull_images) ON releases TO visitor;
+GRANT INSERT (app_uuid, config, message, payload, always_pull_images, source, source_code) ON releases TO visitor;
 
 create policy "select_organization"
 on "app_public"."owner_containerconfigs"
