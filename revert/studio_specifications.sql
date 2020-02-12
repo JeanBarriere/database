@@ -336,6 +336,7 @@ BEGIN
 END;
 $function$
 ;
+COMMENT ON FUNCTION app_private.create_owner_by_login(app_public.git_service, text, username, text, email, text, text, uuid) IS 'Create new users upon logging in.';
 
 CREATE OR REPLACE FUNCTION app_public.app_updated_notify()
  RETURNS trigger
@@ -408,6 +409,7 @@ AS $function$
   LIMIT 1
 $function$
 ;
+COMMENT ON FUNCTION app_public.get_service_repository(uuid) IS E'Return the repository information for a single service.';
 
 CREATE OR REPLACE FUNCTION app_public.owner_username_conflict()
  RETURNS trigger
@@ -757,12 +759,25 @@ on "app_private"."owner_billing"
 for select
 using (owner_uuid = ANY (app_hidden.current_owner_organization_uuids(ARRAY['BILLING'::text])));
 grant select on "app_private"."owner_billing" to visitor;
+ALTER TABLE app_private.owner_billing ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE app_public.builds ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_public.marketing_sources ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_public.owner_containerconfigs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_public.owner_vcs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_public.service_plans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_public.service_tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_public.service_usage ENABLE ROW LEVEL SECURITY;
+
+
+GRANT UPDATE (marketing_source_uuid) ON owners TO visitor;
 
 create policy "select_billing"
 on "app_private"."owner_subscriptions"
 for select
 using (owner_uuid = ANY (app_hidden.current_owner_organization_uuids(ARRAY['BILLING'::text])));
 grant select on "app_private"."owner_subscriptions" to visitor;
+ALTER TABLE app_private.owner_subscriptions ENABLE ROW LEVEL SECURITY;
 
 create policy "select_repo_visible"
 on "app_public"."builds"
@@ -801,6 +816,8 @@ on "app_public"."owner_containerconfigs"
 for insert
 with check (owner_uuid = app_hidden.current_owner_uuid());
 grant insert on "app_public"."owner_containerconfigs" to visitor;
+
+GRANT INSERT (app_uuid, config, message, payload, always_pull_images, source) ON releases TO visitor;
 
 create policy "select_organization"
 on "app_public"."owner_containerconfigs"
