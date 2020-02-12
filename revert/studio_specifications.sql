@@ -265,9 +265,9 @@ alter table "app_public"."owners" add column "marketing_source_uuid" uuid;
 
 CREATE TABLE releases_new(
                          app_uuid                uuid references apps on delete cascade not null,
-                         id                      int,
+                         id                      int CHECK (id > 0) not null default 0,
                          config                  jsonb,
-                         message                 text,
+                         message                 text not null,
                          owner_uuid              uuid not null default current_owner_uuid() references owners on delete set null,
                          timestamp               timestamptz not null default now(),
                          payload                 jsonb default '{"__default__": "true"}'::jsonb,
@@ -299,6 +299,7 @@ COMMENT ON COLUMN releases.source_code IS 'A collection of the raw stories deplo
 alter table releases rename constraint "releases_new_pkey" to "releases_pkey";
 alter table releases rename constraint "releases_new_app_uuid_fkey" to "releases_app_uuid_fkey";
 alter table releases rename constraint "releases_new_owner_uuid_fkey" to "releases_owner_uuid_fkey";
+alter table releases rename constraint "releases_new_id_check" to "releases_id_check";
 
 CREATE POLICY insert_permission ON app_public.releases FOR INSERT TO PUBLIC WITH CHECK (app_hidden.current_owner_has_app_permission(app_uuid, 'CREATE_RELEASE'::text));
 CREATE POLICY select_app ON app_public.releases FOR SELECT TO PUBLIC USING ((EXISTS ( SELECT 1 FROM app_public.apps WHERE (apps.uuid = releases.app_uuid))));
