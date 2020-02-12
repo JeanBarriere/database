@@ -274,7 +274,7 @@ CREATE TABLE releases_new(
                          state                   release_state not null default 'QUEUED'::release_state,
                          source                  release_source not null default 'CODE_UPDATE'::release_source,
                          always_pull_images      boolean not null default false,
-                         source_code             jsonb default null
+                         source_code             jsonb default null,
                          primary key (app_uuid, id)
 );
 
