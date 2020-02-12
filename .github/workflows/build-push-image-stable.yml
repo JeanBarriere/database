@@ -1,0 +1,31 @@
+name: Build Docker Image
+
+on:
+  push:
+    branches:
+      - stable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Get the tag
+        id: get_tag
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - uses: mr-smithers-excellent/docker-build-push@v2
+        with:
+          image: storyscript/database
+          tag: lts
+          registry: docker.io
+          dockerfile: Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - uses: mr-smithers-excellent/docker-build-push@v2
+        with:
+          image: storyscript/database
+          tag: ${{ steps.get_tag.outputs.VERSION }}
+          registry: docker.io
+          dockerfile: Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
