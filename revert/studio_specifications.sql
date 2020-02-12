@@ -295,7 +295,7 @@ CREATE TABLE services_new(
                          type                       service_type not null default 'container'::service_type
 );
 
-insert into services_new select null, null, name, category, description, name, null, topics, false, null, tsvector, false, created_at, null from services;
+insert into services_new select uuid, null, null, name, category, description, name, null, topics, false, null, tsvector, false, created_at, null from services;
 
 drop table services cascade;
 
