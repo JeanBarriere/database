@@ -303,6 +303,14 @@ alter table services_new rename to services;
 
 alter table services rename constraint "services_new_category_fkey" to "services_category_fkey";
 alter table services rename constraint "services_new_pkey" to "services_pkey";
+
+ALTER TABLE ONLY app_public.services ADD CONSTRAINT services_new_alias_key UNIQUE (alias);
+CREATE INDEX services_tsvector_idx ON app_public.services USING gin (tsvector);
+CREATE TRIGGER _200_update_tsvector_insert BEFORE INSERT ON app_public.services FOR EACH ROW EXECUTE PROCEDURE app_public.services__update_tsvector();
+CREATE TRIGGER _200_update_tsvector_update BEFORE UPDATE ON app_public.services FOR EACH ROW WHEN ((new.topics IS DISTINCT FROM old.topics)) EXECUTE PROCEDURE app_public.services__update_tsvector();
+
+ALTER TABLE app_public.services ENABLE ROW LEVEL SECURITY;
+
 COMMENT on column services.name is 'The namespace used for the project slug (org/service).';
 COMMENT on column services.alias is 'The namespace reservation for the service';
 COMMENT on column services.category is 'The category this service belongs too.';
