@@ -262,6 +262,8 @@ alter table "app_public"."owners" drop column "sso_github_id";
 
 alter table "app_public"."owners" add column "marketing_source_uuid" uuid;
 
+
+
 alter table "app_public"."releases" add column "always_pull_images" boolean not null default false;
 
 alter table "app_public"."releases" add column "config" jsonb;
@@ -275,27 +277,62 @@ COMMENT on column releases.payload is 'An object containing the full payload of 
 
 alter table "app_public"."releases" add column "source" app_public.release_source not null default 'CODE_UPDATE'::app_public.release_source;
 
-alter table "app_public"."services" drop column "configuration";
+CREATE TABLE services_new(
+                         uuid                       uuid default uuid_generate_v4() primary key,
+                         repo_uuid                  uuid,
+                         owner_uuid                 uuid,
+                         name                       alias not null,
+                         category                   uuid references service_categories on delete set null,
+                         description                text,
+                         alias                      alias unique,
+                         pull_url                   text,
+                         topics                     citext[],
+                         is_certified               boolean not null default false,
+                         links                      jsonb,
+                         tsvector                   tsvector,
+                         public                     boolean not null default false,
+                         created_at                 timestamp not null default now(),
+                         type                       service_type not null default 'container'::service_type
+);
 
-alter table "app_public"."services" add column "alias" app_public.alias;
+insert into services_new select null, null, name, category, description, name, null, topics, false, null, tsvector, false, created_at, null from services;
+
+drop table services cascade;
+
+alter table services_new rename to services;
+
+alter table apps rename constraint "services_new_category_fkey" to "services_category_fkey";
+alter table services rename constraint "services_new_pkey" to "services_pkey";
+COMMENT on column services.name is 'The namespace used for the project slug (org/service).';
 COMMENT on column services.alias is 'The namespace reservation for the service';
-
-alter table "app_public"."services" add column "is_certified" boolean not null default false;
-
-alter table "app_public"."services" add column "links" jsonb;
+COMMENT on column services.category is 'The category this service belongs too.';
+COMMENT on column services.pull_url is 'Address where the container can be pulled from.';
+COMMENT on column services.topics is 'GitHub repository topics for searching services.';
 COMMENT on column services.links is 'Custom links';
-
-alter table "app_public"."services" add column "owner_uuid" uuid;
-
-alter table "app_public"."services" add column "public" boolean not null default false;
+COMMENT on column services.tsvector is E'@omit\nThis field will not be exposed to GraphQL, it''s for internal use only.';
 COMMENT on column services.public is 'If the service is publicly available';
 
-alter table "app_public"."services" add column "pull_url" text;
-COMMENT on column services.pull_url is 'Address where the container can be pulled from.';
+-- alter table "app_public"."services" drop column "configuration";
 
-alter table "app_public"."services" add column "repo_uuid" uuid;
+-- alter table "app_public"."services" add column "alias" app_public.alias;
+-- COMMENT on column services.alias is 'The namespace reservation for the service';
 
-alter table "app_public"."services" add column "type" app_public.service_type not null default 'container'::app_public.service_type;
+-- alter table "app_public"."services" add column "is_certified" boolean not null default false;
+
+-- alter table "app_public"."services" add column "links" jsonb;
+-- COMMENT on column services.links is 'Custom links';
+
+-- alter table "app_public"."services" add column "owner_uuid" uuid;
+
+-- alter table "app_public"."services" add column "public" boolean not null default false;
+-- COMMENT on column services.public is 'If the service is publicly available';
+
+-- alter table "app_public"."services" add column "pull_url" text;
+-- COMMENT on column services.pull_url is 'Address where the container can be pulled from.';
+
+-- alter table "app_public"."services" add column "repo_uuid" uuid;
+
+-- alter table "app_public"."services" add column "type" app_public.service_type not null default 'container'::app_public.service_type;
 
 set check_function_bodies = off;
 
