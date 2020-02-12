@@ -207,6 +207,34 @@ AND enumtypid = (
 -- -- remove old type
 -- drop type "app_public"."release_state_old"
 
+CREATE TABLE apps_new(
+                     uuid                    uuid default uuid_generate_v4() primary key,
+                     owner_uuid              uuid references owners on delete cascade not null default current_owner_uuid(),
+                     repo_uuid               uuid,
+                     name                    title not null,
+                     timestamp               timestamptz not null default now(),
+                     maintenance             boolean default false not null,
+                     deleted                 boolean default false not null,
+                     environment             environment not null default 'PRODUCTION'::environment,
+                     UNIQUE (owner_uuid, name)
+);
+
+insert into apps_new select uuid, owner_uuid, name, timestamp, deleted from apps;
+
+drop table apps cascade;
+
+alter table apps_new rename to apps;
+
+alter table apps rename constraint "apps_new_owner_uuid_fkey" to "apps_owner_uuid_fkey";
+
+-- alter table "app_public"."apps" add column "environment" app_public.environment not null default 'PRODUCTION'::app_public.environment;
+
+-- alter table "app_public"."apps" add column "maintenance" boolean not null default false;
+
+-- alter table "app_public"."apps" add column "repo_uuid" uuid;
+
+COMMENT on column apps.repo_uuid is 'The Repository linked to this application.';
+
 alter table "app_public"."owners" drop column "sso_github_id";
 
 alter table "app_public"."owners" add column "marketing_source_uuid" uuid;
@@ -746,39 +774,6 @@ alter table "app_public"."services" add constraint "services_owner_uuid_fkey" FO
 alter table "app_public"."services" add constraint "services_repo_uuid_fkey" FOREIGN KEY (repo_uuid) REFERENCES app_hidden.repos(uuid) ON DELETE CASCADE;
 
 alter table "app_runtime"."subscriptions" add constraint "subscriptions_app_uuid_fkey" FOREIGN KEY (app_uuid) REFERENCES app_public.apps(uuid) ON DELETE CASCADE;
-
-
-CREATE TABLE apps_new(
-                     uuid                    uuid default uuid_generate_v4() primary key,
-                     owner_uuid              uuid references owners on delete cascade not null default current_owner_uuid(),
-                     repo_uuid               uuid references repos on delete cascade,
-                     name                    title not null,
-                     timestamp               timestamptz not null default now(),
-                     maintenance             boolean default false not null,
-                     deleted                 boolean default false not null,
-                     environment             environment not null default 'PRODUCTION'::environment,
-                     UNIQUE (owner_uuid, name)
-);
-
-insert into apps_new select uuid, owner_uuid, name, timestamp, deleted from apps;
-
-drop table apps cascade;
-
-alter table apps_new rename to apps;
-
-alter table apps rename constraint "apps_new_owner_uuid_fkey" to "apps_owner_uuid_fkey";
-alter table apps rename constraint "apps_new_repo_uuid_fkey" to "apps_repo_uuid_fkey";
-
--- alter table "app_public"."apps" add column "environment" app_public.environment not null default 'PRODUCTION'::app_public.environment;
-
--- alter table "app_public"."apps" add column "maintenance" boolean not null default false;
-
--- alter table "app_public"."apps" add column "repo_uuid" uuid;
-COMMENT on table apps is 'Owned by an org, an App is a group of Repos that make up an application.';
-COMMENT on column apps.timestamp is 'Date the application was created.';
-COMMENT on column apps.owner_uuid is 'The Owner that owns this application.';
-COMMENT on column apps.repo_uuid is 'The Repository linked to this application.';
-
 
 create policy "select_member"
 on "app_private"."owner_billing"
