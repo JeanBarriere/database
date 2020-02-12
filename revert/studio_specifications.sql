@@ -263,19 +263,39 @@ alter table "app_public"."owners" drop column "sso_github_id";
 alter table "app_public"."owners" add column "marketing_source_uuid" uuid;
 
 
+CREATE TABLE releases_new(
+                         app_uuid                uuid references apps on delete cascade not null,
+                         id                      int CHECK (id > 0) not null default 0,
+                         config                  jsonb,
+                         message                 text CHECK (LENGTH(message) < 1000) not null,
+                         owner_uuid              uuid not null default current_owner_uuid() references owners on delete set null,
+                         timestamp               timestamptz not null default now(),
+                         payload                 jsonb default '{"__default__": "true"}'::jsonb,
+                         state                   release_state not null default 'QUEUED'::release_state,
+                         source                  release_source not null default 'CODE_UPDATE'::release_source,
+                         always_pull_images      boolean not null default false,
+                         source_code             jsonb default null
+                         primary key (app_uuid, id)
+);
 
-alter table "app_public"."releases" add column "always_pull_images" boolean not null default false;
+insert into releases_new select app_uuid, id, null, 'released', owner_uuid, timestamp, null, state, source, false, source_code from releases;
 
-alter table "app_public"."releases" add column "config" jsonb;
-COMMENT on column releases.config is 'Configuration of the release.';
+drop table releases cascade;
 
-alter table "app_public"."releases" add column "message" text not null default 'released';
-COMMENT on column releases.message is 'User defined release message.';
+alter table releases_new rename to releases;
 
-alter table "app_public"."releases" add column "payload" jsonb default '{"__default__": "true"}'::jsonb;
-COMMENT on column releases.payload is 'An object containing the full payload of Storyscripts, e.g., {"foobar": {"1": ...}}';
+-- alter table "app_public"."releases" add column "always_pull_images" boolean not null default false;
 
-alter table "app_public"."releases" add column "source" app_public.release_source not null default 'CODE_UPDATE'::app_public.release_source;
+-- alter table "app_public"."releases" add column "config" jsonb;
+-- COMMENT on column releases.config is 'Configuration of the release.';
+
+-- alter table "app_public"."releases" add column "message" text not null default 'released';
+-- COMMENT on column releases.message is 'User defined release message.';
+
+-- alter table "app_public"."releases" add column "payload" jsonb default '{"__default__": "true"}'::jsonb;
+-- COMMENT on column releases.payload is 'An object containing the full payload of Storyscripts, e.g., {"foobar": {"1": ...}}';
+
+-- alter table "app_public"."releases" add column "source" app_public.release_source not null default 'CODE_UPDATE'::app_public.release_source;
 
 CREATE TABLE services_new(
                          uuid                       uuid default uuid_generate_v4() primary key,
@@ -319,28 +339,6 @@ COMMENT on column services.topics is 'GitHub repository topics for searching ser
 COMMENT on column services.links is 'Custom links';
 COMMENT on column services.tsvector is E'@omit\nThis field will not be exposed to GraphQL, it''s for internal use only.';
 COMMENT on column services.public is 'If the service is publicly available';
-
--- alter table "app_public"."services" drop column "configuration";
-
--- alter table "app_public"."services" add column "alias" app_public.alias;
--- COMMENT on column services.alias is 'The namespace reservation for the service';
-
--- alter table "app_public"."services" add column "is_certified" boolean not null default false;
-
--- alter table "app_public"."services" add column "links" jsonb;
--- COMMENT on column services.links is 'Custom links';
-
--- alter table "app_public"."services" add column "owner_uuid" uuid;
-
--- alter table "app_public"."services" add column "public" boolean not null default false;
--- COMMENT on column services.public is 'If the service is publicly available';
-
--- alter table "app_public"."services" add column "pull_url" text;
--- COMMENT on column services.pull_url is 'Address where the container can be pulled from.';
-
--- alter table "app_public"."services" add column "repo_uuid" uuid;
-
--- alter table "app_public"."services" add column "type" app_public.service_type not null default 'container'::app_public.service_type;
 
 set check_function_bodies = off;
 
