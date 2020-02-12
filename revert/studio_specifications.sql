@@ -226,6 +226,26 @@ drop table apps cascade;
 alter table apps_new rename to apps;
 
 alter table apps rename constraint "apps_new_owner_uuid_fkey" to "apps_owner_uuid_fkey";
+alter table apps rename constraint "apps_new_owner_uuid_name_key" to "apps_owner_uuid_name_key";
+alter table apps rename constraint "apps_new_pkey" to "apps_pkey";
+CREATE INDEX apps_owners_uuid_fk ON app_public.apps USING btree (owner_uuid);
+
+ALTER TABLE ONLY app_private.release_numbers ADD CONSTRAINT release_numbers_app_uuid_fkey FOREIGN KEY (app_uuid) REFERENCES app_public.apps(uuid) ON DELETE CASCADE;
+ALTER TABLE ONLY app_public.app_dns ADD CONSTRAINT app_dns_app_uuid_fkey FOREIGN KEY (app_uuid) REFERENCES app_public.apps(uuid) ON DELETE CASCADE;
+ALTER TABLE ONLY app_public.releases ADD CONSTRAINT releases_app_uuid_fkey FOREIGN KEY (app_uuid) REFERENCES app_public.apps(uuid) ON DELETE CASCADE;
+ALTER TABLE ONLY app_public.team_apps ADD CONSTRAINT team_apps_app_uuid_fkey FOREIGN KEY (app_uuid) REFERENCES app_public.apps(uuid) ON DELETE CASCADE;
+
+ALTER TABLE app_public.apps ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY insert_organization ON app_public.apps FOR INSERT TO visitor WITH CHECK (app_hidden.current_owner_has_organization_permission(owner_uuid, 'CREATE_APP'::text));
+CREATE POLICY insert_own ON app_public.apps FOR INSERT TO visitor WITH CHECK ((owner_uuid = app_hidden.current_owner_uuid()));
+CREATE POLICY select_app ON app_public.app_dns FOR SELECT TO visitor USING ((EXISTS ( SELECT 1 FROM app_public.apps WHERE (apps.uuid = app_dns.app_uuid))));
+CREATE POLICY select_app ON app_public.releases FOR SELECT TO visitor USING ((EXISTS ( SELECT 1 FROM app_public.apps WHERE (apps.uuid = releases.app_uuid))));
+CREATE POLICY select_organization ON app_public.apps FOR SELECT TO visitor USING ((owner_uuid = ANY (app_hidden.current_owner_organization_uuids())));
+CREATE POLICY select_own ON app_public.apps FOR SELECT TO visitor USING ((owner_uuid = app_hidden.current_owner_uuid()));
+CREATE POLICY update_organization ON app_public.apps FOR UPDATE TO visitor USING (app_hidden.current_owner_has_organization_permission(owner_uuid, 'CREATE_APP'::text));
+CREATE POLICY update_own ON app_public.apps FOR UPDATE TO visitor USING ((owner_uuid = app_hidden.current_owner_uuid()));
+GRANT SELECT,INSERT,UPDATE ON TABLE app_public.apps TO visitor;
 
 -- alter table "app_public"."apps" add column "environment" app_public.environment not null default 'PRODUCTION'::app_public.environment;
 
@@ -233,6 +253,9 @@ alter table apps rename constraint "apps_new_owner_uuid_fkey" to "apps_owner_uui
 
 -- alter table "app_public"."apps" add column "repo_uuid" uuid;
 
+COMMENT on table apps is 'Owned by an org, an App is a group of Repos that make up an application.';
+COMMENT on column apps.timestamp is 'Date the application was created.';
+COMMENT on column apps.owner_uuid is 'The Owner that owns this application.';
 COMMENT on column apps.repo_uuid is 'The Repository linked to this application.';
 
 alter table "app_public"."owners" drop column "sso_github_id";
@@ -917,6 +940,8 @@ using (public);
 grant select on "app_public"."services" to visitor;
 
 CREATE TRIGGER _100_app_updated_notify AFTER UPDATE ON app_public.apps FOR EACH ROW WHEN (((old.maintenance IS DISTINCT FROM new.maintenance) OR (new.deleted = true))) EXECUTE PROCEDURE app_public.app_updated_notify();
+CREATE TRIGGER _101_apps_create_dns AFTER INSERT ON app_public.apps FOR EACH ROW EXECUTE PROCEDURE app_public.apps_create_dns();
+CREATE TRIGGER _50_app_prevent_restore BEFORE UPDATE ON app_public.apps FOR EACH ROW EXECUTE PROCEDURE app_public.app_prevent_restore();
 
 CREATE TRIGGER _100_builds_next_id_insert BEFORE INSERT ON app_public.builds FOR EACH ROW EXECUTE PROCEDURE app_public.builds_next_id();
 
