@@ -252,14 +252,19 @@ drop table "app_public"."service_usage";
 
 drop table "app_runtime"."subscriptions";
 
-INSERT INTO pg_enum
-  (enumtypid, enumlabel, enumsortorder)
-SELECT
-  'release_state'::regtype::oid,
-  'DRAFT',
-  (
-    SELECT MAX(enumsortorder) + 1 FROM pg_enum WHERE enumtypid = 'release_state'::regtype
-  );
+-- INSERT INTO pg_enum
+--   (enumtypid, enumlabel, enumsortorder)
+-- SELECT
+--   'release_state'::regtype::oid,
+--   'DRAFT',
+--   (
+--     SELECT MAX(enumsortorder) + 1 FROM pg_enum WHERE enumtypid = 'release_state'::regtype
+--   );
+
+ALTER TYPE release_state rename to release_state_old;
+CREATE TYPE release_state as enum('DRAFT', 'QUEUED', 'DEPLOYING', 'DEPLOYED', 'TERMINATING', 'TERMINATED', 'NO_DEPLOY', 'FAILED', 'SKIPPED_CONCURRENT', 'TIMED_OUT', 'TEMP_DEPLOYMENT_FAILURE');
+alter table "app_public"."releases" alter column "state" type release_state USING "state"::text::release_state;
+drop type release_state_old;
 
 alter table "app_public"."apps" drop column "environment";
 
