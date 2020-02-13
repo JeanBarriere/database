@@ -263,7 +263,8 @@ drop table "app_runtime"."subscriptions";
 
 ALTER TYPE release_state rename to release_state_old;
 CREATE TYPE release_state as enum('DRAFT', 'QUEUED', 'DEPLOYING', 'DEPLOYED', 'TERMINATING', 'TERMINATED', 'NO_DEPLOY', 'FAILED', 'SKIPPED_CONCURRENT', 'TIMED_OUT', 'TEMP_DEPLOYMENT_FAILURE');
-alter table "app_public"."releases" alter column "state" type release_state USING "state"::text::release_state set default 'DRAFT'::release_state;
+alter table "app_public"."releases" alter column "state" type release_state USING "state"::text::release_state;
+alter table "app_public"."releases" alter column "state" set default 'DRAFT'::release_state;
 drop type release_state_old;
 
 alter table "app_public"."apps" drop column "environment";
