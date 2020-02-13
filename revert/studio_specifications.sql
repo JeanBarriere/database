@@ -184,10 +184,10 @@ create table "app_runtime"."subscriptions" (
 );
 
 
-drop function if exists releases_notify();
-drop function if exists release_post_deployed();
 drop trigger if exists "_900_releases_notify" on "app_public"."releases";
 drop trigger if exists "_901_releases_queued_check" on "app_public"."releases";
+drop function if exists releases_notify();
+drop function if exists release_post_deployed();
 
 ALTER TYPE release_state rename to release_state_old;
 CREATE TYPE release_state as enum('QUEUED', 'DEPLOYING', 'DEPLOYED', 'TERMINATING', 'TERMINATED', 'NO_DEPLOY', 'FAILED', 'SKIPPED_CONCURRENT', 'TIMED_OUT', 'TEMP_DEPLOYMENT_FAILURE');
